@@ -31,7 +31,7 @@ FIXME: I have no idea why `./scripts/feeds install -a -p vocore2` not work...
 
 ```
 cd ~/openwrt
-patch p1 < ./package/kernel/mt7628/openwrt/*.patch
+patch -p1 < ./package/kernel/mt7628/openwrt/*.patch
 ```
 
 
