@@ -74,11 +74,11 @@ diff -Naur a/target/linux/ramips/base-files/etc/board.d/01_leds b/target/linux/r
  	;;
  vocore2)
 -	set_wifi_led "$boardname:fuchsia:status"
-+	set_wifi_led "$boardname:onboard:status" "ra0"
++	set_wifi_led "$boardname:fuchsia:status" "ra0"
  	;;
  vocore2lite)
 -	set_wifi_led "$boardname:green:status"
-+	set_wifi_led "$boardname:onboard:status" "ra0"
++	set_wifi_led "$boardname:green:status" "ra0"
  	;;
  w502u)
  	set_usb_led "$boardname:blue:usb"
