@@ -1,0 +1,28 @@
+config wifi-device	radio0
+	option type     ralink
+	option variant	mt7628
+	option country	CN
+	option hwmode	11g
+	option htmode	HT40
+	option channel  auto
+	option disabled	0
+
+config wifi-iface ap
+	option device   radio0
+	option mode	ap
+	option network  lan
+	option ifname   ra0
+	option ssid	VoCore2
+	option encryption none 
+
+config wifi-iface sta
+	option device   radio0
+	option mode	sta
+	option network  wwan
+	option ifname   apcli0
+	option led 	mediatek:onboard:wifi
+	option ssid	[STA SSID]
+	option key	[STA PASS]
+	option encryption psk
+	option disabled	1
+

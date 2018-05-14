@@ -1,0 +1,84 @@
+diff -Naru a/package/base-files/files/bin/config_generate b/package/base-files/files/bin/config_generate
+--- a/package/base-files/files/bin/config_generate
++++ b/package/base-files/files/bin/config_generate
+@@ -92,7 +92,7 @@
+ 		static)
+ 			local ipad
+ 			case "$1" in
+-				lan) ipad=${ipaddr:-"192.168.1.1"} ;;
++				lan) ipad=${ipaddr:-"192.168.61.1"} ;;
+ 				*) ipad=${ipaddr:-"192.168.$((addr_offset++)).1"} ;;
+ 			esac
+ 
+@@ -132,6 +132,17 @@
+ 			EOF
+ 		;;
+ 	esac
++
++	uci -q batch <<-EOF
++		add_list firewall.@zone[1].network="wwan"
++		set network.wan=interface
++		set network.wan.ifname=eth0.2
++		set network.wan.force_link=1
++		set network.wan.proto=dhcp
++		set network.wwan=interface
++		set network.wwan.ifname=apcli0
++		set network.wwan.proto=dhcp
++	EOF
+ }
+ 
+ generate_switch_vlans_ports() {
+diff -Naru a/target/linux/ramips/dts/VOCORE2.dts b/target/linux/ramips/dts/VOCORE2.dts
+--- a/target/linux/ramips/dts/VOCORE2.dts
++++ b/target/linux/ramips/dts/VOCORE2.dts
+@@ -53,3 +53,8 @@
+ 		};
+ 	};
+ };
++
++&sdhci {
++       status = "okay";
++       mediatek,cd-poll;
++};
+diff -Naru a/target/linux/ramips/patches-4.14/801-mt7628-kernel-wext-oldapi.patch b/target/linux/ramips/patches-4.14/801-mt7628-kernel-wext-oldapi.patch
+--- a/target/linux/ramips/patches-4.14/801-mt7628-kernel-wext-oldapi.patch
++++ b/target/linux/ramips/patches-4.14/801-mt7628-kernel-wext-oldapi.patch
+@@ -0,0 +1,13 @@
++diff -Naru a/net/wireless/wext-core.c b/net/wireless/wext-core.c
++--- a/net/wireless/wext-core.c	
+++++ b/net/wireless/wext-core.c
++@@ -956,6 +956,9 @@
++ 		else if (private)
++ 			return private(dev, iwr, cmd, info, handler);
++ 	}
+++	/* Old driver API : call driver ioctl handler */
+++	if (dev->netdev_ops->ndo_do_ioctl)
+++		return dev->netdev_ops->ndo_do_ioctl(dev, (struct ifreq *)iwr, cmd);
++ 	return -EOPNOTSUPP;
++ }
++ 
+diff -Naru a/package/base-files/files/etc/shadow b/package/base-files/files/etc/shadow
+--- a/package/base-files/files/etc/shadow
++++ b/package/base-files/files/etc/shadow
+@@ -1,4 +1,4 @@
+-root::0:0:99999:7:::
++root:$1$D5k7lRVZ$71Jw2pHBawdA3eafF1DBm0:17641:0:99999:7:::
+ daemon:*:0:0:99999:7:::
+ ftp:*:0:0:99999:7:::
+ network:*:0:0:99999:7:::
+diff -Naur a/target/linux/ramips/base-files/etc/board.d/01_leds b/target/linux/ramips/base-files/etc/board.d/01_leds
+--- a/target/linux/ramips/base-files/etc/board.d/01_leds
++++ b/target/linux/ramips/base-files/etc/board.d/01_leds
+@@ -443,10 +443,10 @@
+ 	set_wifi_led "vocore:green:status"
+ 	;;
+ vocore2)
+-	set_wifi_led "$boardname:fuchsia:status"
++	set_wifi_led "$boardname:onboard:status" "ra0"
+ 	;;
+ vocore2lite)
+-	set_wifi_led "$boardname:green:status"
++	set_wifi_led "$boardname:onboard:status" "ra0"
+ 	;;
+ w502u)
+ 	set_usb_led "$boardname:blue:usb"
