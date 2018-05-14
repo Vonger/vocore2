@@ -34,4 +34,7 @@ patch p1 < ./package/kernel/mt7628/openwrt/vocore2.patch
 
 this is because in ralink.sh, sta mode is using ap_client but not directly set by iwpriv.
 
- 
+
+# Thank you
+
+Thanks to all openwrt contributors! Hope we can make it better and better :) 
