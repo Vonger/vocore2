@@ -10,9 +10,9 @@ PKG_NAME:=mt7628
 P4REV:=120395
 PKG_VERSION:=p4rev-$(P4REV)
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
-PKG_SOURCE_URL:=http://vonger.cn/misc/vocore2/ \
-		https://github.com/saviourxx/openwrt_dl/raw/master/ \
-		https://github.com/guoxiaoqiao/mtk-openwrt-sdk/raw/master/dl/
+PKG_SOURCE_URL:=https://github.com/saviourxx/openwrt_dl/raw/master/ \
+		https://github.com/guoxiaoqiao/mtk-openwrt-sdk/raw/master/dl/ \
+		http://vonger.cn/misc/vocore2/
 PKG_MD5SUM:=873ac1eccb0a9f5ca1c8c1b5e9ff5197
 PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -40,7 +40,7 @@ define KernelPackage/mt7628
   FILES:=$(PKG_BUILD_DIR)/build/mt7628.ko
   SUBMENU:=Wireless Drivers
   MENU:=1
-  AUTOLOAD:=$(call AutoLoad,99,mt7628)
+  AUTOLOAD:=$(call AutoLoad,98,mt7628)
 endef
 
 define KernelPackage/mt7628/config
