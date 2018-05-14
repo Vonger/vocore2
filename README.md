@@ -35,7 +35,22 @@ patch -p1 < ./package/kernel/mt7628/openwrt/*.patch
 ```
 
 
-3. config mt7628 in `make menuconfig` -> Kernel modules -> Wireless Drivers -> kmod-mt7628
+3. config mt7628 in `make menuconfig` Kernel modules -> Wireless Drivers -> kmod-mt7628
+
+Target System: MediaTek Ralink MIPS
+
+Subtarget: MT76x8 based boards
+
+Kernel modules -> Wireless Drivers -> unselect kmod-mt76 / select kmod-mt7628 -> select WiFi Operation Mode -> enable AP-Client support for AP+STA mode and AdHoc mode; enable SNIFFER for monitor mode.
+
+Base System -> select wireless-tools (need its iwpriv)
+
+Utilties(option): unselect iwinfo (we do not use it and it won't work with this driver)
+
+Network(option): unselect wapd-mini (mt7628.ko already have WPA support)
+
+Global build settings(option): Kernel build options -> /dev/mem virtual device support(enable /dev/mem for easy debug)
+
 
 4. compile and enjoy!
 
