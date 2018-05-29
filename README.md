@@ -49,11 +49,17 @@ patch -p1 < ./package/kernel/mt7628/openwrt/*.patch
 4. compile and enjoy!
 
 
-# Known Issue
+# Known Issue + TODO
 
-1. STA mode is not working
+1. AP + STA mode is not fully support all mode
 
-- FIXME: this is because in ralink.sh, sta mode is using ap_client but not directly set by iwpriv.
+currently it is only for wpa2, rest mode need to upgrade the ralink.sh
+
+2. support mutilssid in uci wireless config.
+
+3. support monitor in uci wireless config.
+
+note: 2, 3 is supported already, check my blog at vonger.cn to get tutorial about how to make them work.
 
 
 # Thank you
