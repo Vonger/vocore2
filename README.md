@@ -59,7 +59,7 @@ currently it is only for wpa2, rest mode need to upgrade the ralink.sh
 
 3. support monitor in uci wireless config.
 
-note: 2, 3 is supported already, check my blog at vonger.cn to get tutorial about how to make them work.
+note: 2, 3 are supported already, check my blog at vonger.cn to get tutorial about how to make them work.
 
 
 # Thank you
