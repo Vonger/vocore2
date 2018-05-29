@@ -125,13 +125,19 @@ ralink_setup_ap(){
 	wireless_add_vif "$name" "$ifname"
 }
 
+ralink_get_channel() {
+	iwpriv ra0 get_site_survey | grep "\<$1\>" | awk '{print $1}' | head -1
+}
+
 ralink_setup_sta(){
 	local name="$1"
 
 	json_select config
-	json_get_vars mode apname ifname ssid encryption key key1 key2 key3 key4 wps_pushbutton disabled led
+	json_get_vars mode apname ifname ssid encryption key key1 key2 key3 key4 disabled
 
 	[ "$disabled" = "1" ] && return
+
+	ifconfig $ifname up
 
 	key=
 	case "$encryption" in
@@ -140,9 +146,19 @@ ralink_setup_sta(){
 	esac
 	json_select ..
 
-	/sbin/ap_client "ra0" "$ifname" "${ssid}" "${key}" "${led}"
+	iwpriv ra0 set SiteSurvey=1
 	sleep 1
-	wireless_add_process "$(cat /tmp/apcli-${ifname}.pid)" /sbin/ap_client ra0 "$ifname" "${ssid}" "${key}" "${led}"
+
+	channel=$(ralink_get_channel $ssid)
+	[ ! -n "$channel" ] && return
+	iwpriv ra0 set Channel=$channel
+
+	iwpriv $ifname set ApCliEnable=0
+	iwpriv $ifname set ApCliAuthMode=WPA2PSK
+	iwpriv $ifname set ApCliEncrypType=AES
+	iwpriv $ifname set ApCliSsid=$ssid
+	iwpriv $ifname set ApCliWPAPSK=$key
+	iwpriv $ifname set ApCliEnable=1
 
 	wireless_add_vif "$name" "$ifname"
 }
