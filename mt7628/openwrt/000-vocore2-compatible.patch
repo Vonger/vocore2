@@ -9,22 +9,23 @@ diff -Naru a/package/base-files/files/bin/config_generate b/package/base-files/f
 +				lan) ipad=${ipaddr:-"192.168.61.1"} ;;
  				*) ipad=${ipaddr:-"192.168.$((addr_offset++)).1"} ;;
  			esac
- 
-@@ -132,6 +132,17 @@
+@@ -132,19 +132,6 @@
  			EOF
  		;;
  	esac
-+
-+	uci -q batch <<-EOF
-+		add_list firewall.@zone[1].network="wwan"
-+		set network.wan=interface
-+		set network.wan.ifname=eth0.2
-+		set network.wan.force_link=1
-+		set network.wan.proto=dhcp
-+		set network.wwan=interface
-+		set network.wwan.ifname=apcli0
-+		set network.wwan.proto=dhcp
-+	EOF
+-
+-	local suffix=`hexdump -C /dev/mtd2 | head -1 | awk '{print $10$11}'`
+-	uci -q batch <<-EOF
+-		uci set wireless.ap.ssid=VoCore2-$suffix
+-		add_list firewall.@zone[1].network="wwan"
+-		set network.wan=interface
+-		set network.wan.ifname=eth0.2
+-		set network.wan.force_link=1
+-		set network.wan.proto=dhcp
+-		set network.wwan=interface
+-		set network.wwan.ifname=apcli0
+-		set network.wwan.proto=dhcp
+-	EOF
  }
  
  generate_switch_vlans_ports() {
