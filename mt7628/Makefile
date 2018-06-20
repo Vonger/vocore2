@@ -57,6 +57,9 @@ define Build/Compile
 endef
 
 define KernelPackage/mt7628/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) ./files/ant1 $(1)/usr/bin
+	$(INSTALL_BIN) ./files/ant2 $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/lib/netifd/wireless
 	$(INSTALL_BIN) ./files/ralink.sh $(1)/lib/netifd/wireless/
 	$(INSTALL_DIR) $(1)/etc/config
