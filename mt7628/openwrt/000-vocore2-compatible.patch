@@ -29,18 +29,6 @@ diff -Naru a/package/base-files/files/bin/config_generate b/package/base-files/f
  }
  
  generate_switch_vlans_ports() {
-diff -Naru a/target/linux/ramips/dts/VOCORE2.dts b/target/linux/ramips/dts/VOCORE2.dts
---- a/target/linux/ramips/dts/VOCORE2.dts
-+++ b/target/linux/ramips/dts/VOCORE2.dts
-@@ -53,3 +53,8 @@
- 		};
- 	};
- };
-+
-+&sdhci {
-+       status = "okay";
-+       mediatek,cd-poll;
-+};
 diff -Naru a/target/linux/ramips/patches-4.14/801-mt7628-kernel-wext-oldapi.patch b/target/linux/ramips/patches-4.14/801-mt7628-kernel-wext-oldapi.patch
 --- a/target/linux/ramips/patches-4.14/801-mt7628-kernel-wext-oldapi.patch
 +++ b/target/linux/ramips/patches-4.14/801-mt7628-kernel-wext-oldapi.patch
@@ -83,3 +71,23 @@ diff -Naur a/target/linux/ramips/base-files/etc/board.d/01_leds b/target/linux/r
  	;;
  w502u)
  	set_usb_led "$boardname:blue:usb"
+diff -Naru a/target/linux/ramips/dts/VOCORE2.dts b/target/linux/ramips/dts/VOCORE2.dts
+--- a/target/linux/ramips/dts/VOCORE2.dts
++++ b/target/linux/ramips/dts/VOCORE2.dts
+@@ -44,7 +44,6 @@
+ 		factory: partition@40000 {
+ 			label = "factory";
+ 			reg = <0x40000 0x10000>;
+-			read-only;
+ 		};
+ 
+ 		partition@50000 {
+@@ -53,3 +52,8 @@
+ 		};
+ 	};
+ };
++
++&sdhci {
++       status = "okay";
++       mediatek,cd-poll;
++};
