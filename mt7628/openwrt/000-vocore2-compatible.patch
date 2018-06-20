@@ -70,7 +70,7 @@ diff -Naru a/package/base-files/files/etc/shadow b/package/base-files/files/etc/
 diff -Naur a/target/linux/ramips/base-files/etc/board.d/01_leds b/target/linux/ramips/base-files/etc/board.d/01_leds
 --- a/target/linux/ramips/base-files/etc/board.d/01_leds
 +++ b/target/linux/ramips/base-files/etc/board.d/01_leds
-@@ -443,10 +443,10 @@
+@@ -446,10 +446,10 @@
  	set_wifi_led "vocore:green:status"
  	;;
  vocore2)
