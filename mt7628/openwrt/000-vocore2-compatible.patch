@@ -16,16 +16,16 @@ diff -Naru a/package/base-files/files/bin/config_generate b/package/base-files/f
  	esac
 +
 +	uci -q batch <<-EOF
-+               set wireless.ap.ssid=VoCore2-`hexdump -C /dev/mtd2 | head -1 | awk '{print $10$11}'`
-+               add_list firewall.@zone[1].network="wwan"
-+               set network.wan=interface
-+               set network.wan.ifname=eth0.2
-+               set network.wan.force_link=1
-+               set network.wan.proto=dhcp
-+               set network.wwan=interface
-+               set network.wwan.ifname=apcli0
-+               set network.wwan.proto=dhcp
-+       EOF
++		add_list firewall.@zone[1].network="wwan"
++		set wireless.ap.ssid=VoCore2-`hexdump -C /dev/mtd2 | head -1 | awk '{print $10$11}'`
++		set network.wan=interface
++		set network.wan.ifname=eth0.2
++		set network.wan.force_link=1
++		set network.wan.proto=dhcp
++		set network.wwan=interface
++		set network.wwan.ifname=apcli0
++		set network.wwan.proto=dhcp
++	EOF
  }
  
  generate_switch_vlans_ports() {
