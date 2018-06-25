@@ -46,22 +46,6 @@ diff -Naur a/src/embedded/ap/ap_cfg.c b/src/embedded/ap/ap_cfg.c
  
  #ifdef CONFIG_ANDES_SUPPORT
  	if (pAd->chipCap.MCUType == ANDES) {
-diff -Naur a/src/embedded/common/cmm_info.c b/src/embedded/common/cmm_info.c
---- a/src/embedded/common/cmm_info.c	2015-02-27 14:13:11.000000000 +0800
-+++ b/src/embedded/common/cmm_info.c	2018-04-15 14:08:52.595106936 +0800
-@@ -93,12 +93,10 @@
- {
- #ifdef CONFIG_AP_SUPPORT
- 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
--		MTWF_LOG(DBG_CAT_ALL, DBG_SUBCAT_ALL, DBG_LVL_OFF, ("Driver version-%s %s %s\n", AP_DRIVER_VERSION, __DATE__, __TIME__));
- #endif /* CONFIG_AP_SUPPORT */
- 
- #ifdef CONFIG_STA_SUPPORT
- 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
--		MTWF_LOG(DBG_CAT_ALL, DBG_SUBCAT_ALL, DBG_LVL_OFF, ("Driver version-%s %s %s\n", STA_DRIVER_VERSION, __DATE__, __TIME__));
- #endif /* CONFIG_STA_SUPPORT */
- 
- #ifdef CONFIG_ANDES_SUPPORT
 diff -Naur a/src/embedded/common/wsc.c b/src/embedded/common/wsc.c
 --- a/src/embedded/common/wsc.c	2015-02-27 14:13:09.000000000 +0800
 +++ b/src/embedded/common/wsc.c	2018-04-15 14:08:52.531103220 +0800
@@ -345,3 +329,28 @@ diff -Naur a/src/embedded/include/os/rt_drv.h b/src/embedded/include/os/rt_drv.h
  
  
  #define DBGPRINT_ERR(Fmt)           \
+diff -Naur a/src/embedded/common/cmm_info.c b/src/embedded/common/cmm_info.c
+--- a/src/embedded/common/cmm_info.c    2015-02-27 14:13:11.000000000 +0800
++++ b/src/embedded/common/cmm_info.c    2018-04-15 14:08:52.595106936 +0800
+@@ -93,12 +93,10 @@
+ {
+ #ifdef CONFIG_AP_SUPPORT
+ 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+-		MTWF_LOG(DBG_CAT_ALL, DBG_SUBCAT_ALL, DBG_LVL_OFF, ("Driver version-%s %s %s\n", AP_DRIVER_VERSION, __DATE__, __TIME__));
+ #endif /* CONFIG_AP_SUPPORT */
+ 
+ #ifdef CONFIG_STA_SUPPORT
+ 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
+-		MTWF_LOG(DBG_CAT_ALL, DBG_SUBCAT_ALL, DBG_LVL_OFF, ("Driver version-%s %s %s\n", STA_DRIVER_VERSION, __DATE__, __TIME__));
+ #endif /* CONFIG_STA_SUPPORT */
+ 
+ #ifdef CONFIG_ANDES_SUPPORT
+@@ -3123,7 +3121,7 @@
+ 			Rssi_Quality = (UINT)(((Rssi + 90) * 26)/10);
+ 		else    /* < -84 dbm*/
+ 			Rssi_Quality = 0;
+-		sprintf(msg+strlen(msg),"%-9d", Rssi_Quality);
++		sprintf(msg+strlen(msg),"%-9d", Rssi);
+ 
+ 		/* Wireless Mode*/
+ 		wireless_mode = NetworkTypeInUseSanity(pBss);
