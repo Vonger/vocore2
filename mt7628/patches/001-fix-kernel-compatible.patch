@@ -285,7 +285,7 @@ diff -Naur a/src/embedded/sniffer/sniffer_radiotap.c b/src/embedded/sniffer/snif
  
  	pOSPkt->dev = pOSPkt->dev;
 -	pOSPkt->mac_header = pOSPkt->data;
-+	pOSPkt->mac_header = *(__u16 *)pOSPkt->data;
++	pOSPkt->mac_header = pOSPkt->data - pOSPkt->head;
  	pOSPkt->pkt_type = PACKET_OTHERHOST;
  	pOSPkt->protocol = __constant_htons(ETH_P_80211_RAW);
  	pOSPkt->ip_summed = CHECKSUM_NONE;
