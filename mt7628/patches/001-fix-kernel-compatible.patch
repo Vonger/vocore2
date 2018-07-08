@@ -215,44 +215,6 @@ diff -Naur a/src/embedded/os/linux/rt_flash.c b/src/embedded/os/linux/rt_flash.c
 +MODULE_AUTHOR("Steven Liu <steven_liu@ralinktech.com.tw>");
 +MODULE_DESCRIPTION("Ralink APSoC Flash Map");
 +MODULE_LICENSE("GPL");
-diff -Naur a/src/embedded/os/linux/rt_linux.c b/src/embedded/os/linux/rt_linux.c
---- a/src/embedded/os/linux/rt_linux.c	2015-02-27 14:13:06.000000000 +0800
-+++ b/src/embedded/os/linux/rt_linux.c	2018-04-15 14:08:52.231085804 +0800
-@@ -330,7 +330,7 @@
- #ifdef RA_MTD_RW_BY_NUM
- 	ra_mtd_read(MTD_NUM_FACTORY, 0, (size_t) b, p);
- #else
--	ra_mtd_read_nm("Factory", a&0xFFFF, (size_t) b, p);
-+	ra_mtd_read_nm("factory", a&0xFFFF, (size_t) b, p);
- #endif
- #endif /* CONFIG_RALINK_FLASH_API */
- }
-@@ -886,8 +886,11 @@
- int RtmpOSFileRead(RTMP_OS_FD osfd, char *pDataPtr, int readLen)
- {
- 	/* The object must have a read method */
--	if (osfd->f_op && osfd->f_op->read) {
--		return osfd->f_op->read(osfd, pDataPtr, readLen, &osfd->f_pos);
-+	if (osfd->f_op) {
-+		if (osfd->f_op->read)
-+			return osfd->f_op->read(osfd, pDataPtr, readLen, &osfd->f_pos);
-+		else
-+			return kernel_read(osfd, pDataPtr, readLen, &osfd->f_pos);
- 	} else {
- 		MTWF_LOG(DBG_CAT_ALL, DBG_SUBCAT_ALL, DBG_LVL_ERROR, ("no file read method\n"));
- 		return -1;
-@@ -897,7 +900,10 @@
- 
- int RtmpOSFileWrite(RTMP_OS_FD osfd, char *pDataPtr, int writeLen)
- {
--	return osfd->f_op->write(osfd, pDataPtr, (size_t) writeLen, &osfd->f_pos);
-+	if (osfd->f_op && osfd->f_op->write)
-+		return osfd->f_op->write(osfd, pDataPtr, (size_t) writeLen, &osfd->f_pos);
-+	else
-+		return kernel_write(osfd, pDataPtr, (size_t) writeLen, &osfd->f_pos);
- }
- 
- 
 diff -Naur a/src/embedded/os/linux/rt_proc.c b/src/embedded/os/linux/rt_proc.c
 --- a/src/embedded/os/linux/rt_proc.c	2015-02-27 14:13:06.000000000 +0800
 +++ b/src/embedded/os/linux/rt_proc.c	2018-04-15 14:08:52.239086268 +0800
@@ -354,3 +316,49 @@ diff -Naur a/src/embedded/common/cmm_info.c b/src/embedded/common/cmm_info.c
  
  		/* Wireless Mode*/
  		wireless_mode = NetworkTypeInUseSanity(pBss);
+diff -Naur a/src/embedded/os/linux/rt_linux.c b/src/embedded/os/linux/rt_linux.c
+--- a/src/embedded/os/linux/rt_linux.c  2015-02-27 14:13:06.000000000 +0800
++++ b/src/embedded/os/linux/rt_linux.c  2018-04-15 14:08:52.231085804 +0800
+@@ -330,7 +330,7 @@
+ #ifdef RA_MTD_RW_BY_NUM
+ 	ra_mtd_read(MTD_NUM_FACTORY, 0, (size_t) b, p);
+ #else
+-	ra_mtd_read_nm("Factory", a&0xFFFF, (size_t) b, p);
++	ra_mtd_read_nm("factory", a&0xFFFF, (size_t) b, p);
+ #endif
+ #endif /* CONFIG_RALINK_FLASH_API */
+ }
+@@ -479,7 +479,6 @@
+ 	struct sk_buff *pRxPkt, *pClonedPkt;
+ 
+ 	ASSERT(pkt);
+-	ASSERT(sz < 1530);
+ 	pRxPkt = RTPKT_TO_OSPKT(pkt);
+ 
+ 	/* clone the packet */
+@@ -886,8 +885,11 @@
+ int RtmpOSFileRead(RTMP_OS_FD osfd, char *pDataPtr, int readLen)
+ {
+ 	/* The object must have a read method */
+-	if (osfd->f_op && osfd->f_op->read) {
+-		return osfd->f_op->read(osfd, pDataPtr, readLen, &osfd->f_pos);
++	if (osfd->f_op) {
++		if (osfd->f_op->read)
++			return osfd->f_op->read(osfd, pDataPtr, readLen, &osfd->f_pos);
++		else
++			return kernel_read(osfd, pDataPtr, readLen, &osfd->f_pos);
+ 	} else {
+ 		MTWF_LOG(DBG_CAT_ALL, DBG_SUBCAT_ALL, DBG_LVL_ERROR, ("no file read method\n"));
+ 		return -1;
+@@ -897,7 +899,10 @@
+ 
+ int RtmpOSFileWrite(RTMP_OS_FD osfd, char *pDataPtr, int writeLen)
+ {
+-	return osfd->f_op->write(osfd, pDataPtr, (size_t) writeLen, &osfd->f_pos);
++	if (osfd->f_op && osfd->f_op->write)
++		return osfd->f_op->write(osfd, pDataPtr, (size_t) writeLen, &osfd->f_pos);
++	else
++		return kernel_write(osfd, pDataPtr, (size_t) writeLen, &osfd->f_pos);
+ }
+ 
+ 
