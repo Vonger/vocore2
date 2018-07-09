@@ -242,7 +242,41 @@ diff -Naur a/src/embedded/os/linux/rt_profile.c b/src/embedded/os/linux/rt_profi
 diff -Naur a/src/embedded/sniffer/sniffer_radiotap.c b/src/embedded/sniffer/sniffer_radiotap.c
 --- a/src/embedded/sniffer/sniffer_radiotap.c	2015-02-27 14:13:05.000000000 +0800
 +++ b/src/embedded/sniffer/sniffer_radiotap.c	2018-04-15 14:08:52.639109490 +0800
-@@ -348,7 +348,7 @@
+@@ -138,6 +138,9 @@
+ 	/* channel flags */
+ 	varlen += 2;
+ 
++	/* signal and antenna */
++	varlen += 2;
++
+ 	/* MCS */
+ 	if ((PHYMODE == MODE_HTMIX) || (PHYMODE == MODE_HTGREENFIELD)) {
+ 		/* known */
+@@ -206,6 +209,8 @@
+ 	}
+ 
+ 	mtk_rt_hdr->rt_hdr.it_present |= cpu2le32(1 << IEEE80211_RADIOTAP_CHANNEL);
++	mtk_rt_hdr->rt_hdr.it_present |= cpu2le32(1 << IEEE80211_RADIOTAP_DBM_ANTSIGNAL);
++	mtk_rt_hdr->rt_hdr.it_present |= cpu2le32(1 << IEEE80211_RADIOTAP_ANTENNA);
+ 
+ 	if ((PHYMODE == MODE_HTMIX) || (PHYMODE == MODE_HTGREENFIELD)) {
+ 		mtk_rt_hdr->rt_hdr.it_present |= cpu2le32(1 << IEEE80211_RADIOTAP_MCS);	
+@@ -278,6 +283,14 @@
+ 	pos += 2;
+ 	varlen += 2;
+ 
++	*pos = MaxRssi;
++	pos++;
++	varlen++;
++
++	*pos = 0;
++	pos++;
++	varlen++;
++
+ 	/* HT MCS */
+ 	if ((PHYMODE == MODE_HTMIX) || (PHYMODE == MODE_HTGREENFIELD)) {
+ 
+@@ -348,7 +361,7 @@
  
  
  	pOSPkt->dev = pOSPkt->dev;
