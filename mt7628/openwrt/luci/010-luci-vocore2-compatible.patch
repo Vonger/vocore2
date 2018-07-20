@@ -1,0 +1,11 @@
+--- a/package/feeds/luci/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
++++ b/package/feeds/luci/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
+@@ -660,7 +660,7 @@
+ 			"and ad-hoc mode) to be installed."
+ 		)
+ 	end
+-elseif hwtype == "broadcom" then
++elseif hwtype == "broadcom" or hwtype == "ralink" then
+ 	encr:value("psk", "WPA-PSK")
+ 	encr:value("psk2", "WPA2-PSK")
+ 	encr:value("psk+psk2", "WPA-PSK/WPA2-PSK Mixed Mode")

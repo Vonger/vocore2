@@ -48,6 +48,20 @@ patch -p1 < ./package/kernel/mt7628/openwrt/*.patch
 
 4. compile and enjoy!
 
+### Option
+
+1. enable iwinfo support. default: enable
+
+mkdir [openwrt]/package/network/utils/iwinfo/patches/
+ 
+cp [openwrt]/package/kernel/mt7628/openwrt/080-* [openwrt]/package/network/utils/iwinfo/patches/
+
+2. enable luci setting up STA mode, WPA/WPA2. default: disable
+
+install luci feeds first.
+
+patch -p1 ./package/kernel/mt7628/openwrt/luci/*.patch
+
 
 # Known Issue + TODO
 
