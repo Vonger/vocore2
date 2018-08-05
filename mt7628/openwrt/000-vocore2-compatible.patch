@@ -74,14 +74,6 @@ diff -Naur a/target/linux/ramips/base-files/etc/board.d/01_leds b/target/linux/r
 diff -Naru a/target/linux/ramips/dts/VOCORE2.dts b/target/linux/ramips/dts/VOCORE2.dts
 --- a/target/linux/ramips/dts/VOCORE2.dts
 +++ b/target/linux/ramips/dts/VOCORE2.dts
-@@ -44,7 +44,6 @@
- 		factory: partition@40000 {
- 			label = "factory";
- 			reg = <0x40000 0x10000>;
--			read-only;
- 		};
- 
- 		partition@50000 {
 @@ -53,3 +52,8 @@
  		};
  	};
