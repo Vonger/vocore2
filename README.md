@@ -27,11 +27,14 @@ cp -r ./feeds/vocore2/mt7628 ./package/kernel
 
 FIXME: I have no idea why `./scripts/feeds install -a -p vocore2` not work...
 
-2. patch your openwrt with openwrt/package/kernel/mt7628/openwrt/vocore2.patch
+2. patch your openwrt with necessary patches to use this driver.
 
 ```
 cd ~/openwrt
-patch -p1 < ./package/kernel/mt7628/openwrt/*.patch
+patch -p1 < ./package/kernel/mt7628/openwrt/000-*.patch
+
+mkdir ./package/network/utils/iwinfo/patches
+cp ./package/kernel/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/patches
 ```
 
 
@@ -41,8 +44,7 @@ patch -p1 < ./package/kernel/mt7628/openwrt/*.patch
 - Subtarget: MT76x8 based boards
 - Kernel modules -> Wireless Drivers -> unselect kmod-mt76 / select kmod-mt7628 -> select WiFi Operation Mode -> enable AP-Client support for AP+STA mode and AdHoc mode; enable SNIFFER for monitor mode.
 - Base System -> select wireless-tools (need its iwpriv)
-- Utilties(option): unselect iwinfo (we do not use it and it won't work with this driver)
-- Network(option): unselect wapd-mini (mt7628.ko already have WPA support)
+- Network(option): unselect wapd-mini/hostapd-common (mt7628.ko already have WPA support)
 - Global build settings(option): Kernel build options -> /dev/mem virtual device support(enable /dev/mem for easy debug)
 
 
@@ -50,13 +52,7 @@ patch -p1 < ./package/kernel/mt7628/openwrt/*.patch
 
 ### Option
 
-1. enable iwinfo support. default: enable
-
-mkdir [openwrt]/package/network/utils/iwinfo/patches/
- 
-cp [openwrt]/package/kernel/mt7628/openwrt/080-* [openwrt]/package/network/utils/iwinfo/patches/
-
-2. enable luci setting up STA mode, WPA/WPA2. default: disable
+1. enable luci setting up STA mode, WPA/WPA2. default: disable
 
 install luci feeds first.
 
