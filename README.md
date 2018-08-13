@@ -56,7 +56,7 @@ cp ./package/kernel/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/pa
 
 install luci feeds first.
 
-patch -p1 ./package/kernel/mt7628/openwrt/luci/*.patch
+patch -p1 < ./package/kernel/mt7628/openwrt/luci/*.patch
 
 
 # Known Issue + TODO
