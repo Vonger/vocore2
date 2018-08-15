@@ -42,7 +42,7 @@ cp ./package/kernel/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/pa
 
 - Target System: MediaTek Ralink MIPS
 - Subtarget: MT76x8 based boards
-- Kernel modules -> Wireless Drivers -> unselect kmod-mt76 / select kmod-mt7628 -> select WiFi Operation Mode -> enable AP-Client support for AP+STA mode and AdHoc mode; enable SNIFFER for monitor mode.
+- Kernel modules -> Wireless Drivers -> unselect kmod-mt76 / select kmod-mt7628 -> select WiFi Operation Mode -> enable AP-Client support for AP+STA mode; enable SNIFFER for monitor mode.
 - Base System -> select wireless-tools (need its iwpriv)
 - Network(option): unselect wapd-mini/hostapd-common (mt7628.ko already have WPA support)
 - Global build settings(option): Kernel build options -> /dev/mem virtual device support(enable /dev/mem for easy debug)
@@ -52,11 +52,13 @@ cp ./package/kernel/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/pa
 
 ### Option
 
-1. enable luci setting up STA mode, WPA/WPA2. default: disable
+1. enable luci setting up AP+STA mode, WPA/WPA2. default: disable
 
 install luci feeds first.
 
 patch -p1 < ./package/kernel/mt7628/openwrt/luci/*.patch
+
+details please check http://vonger.cn/?p=14525
 
 
 # Known Issue + TODO
