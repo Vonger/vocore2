@@ -154,10 +154,42 @@ ralink_setup_sta(){
 	iwpriv ra0 set Channel=$channel
 
 	iwpriv $ifname set ApCliEnable=0
-	iwpriv $ifname set ApCliAuthMode=WPA2PSK
-	iwpriv $ifname set ApCliEncrypType=AES
-	iwpriv $ifname set ApCliSsid=$ssid
-	iwpriv $ifname set ApCliWPAPSK=$key
+	#iwpriv $ifname set ApCliAuthMode=WPA2PSK
+	#iwpriv $ifname set ApCliEncrypType=AES
+
+	case "$encryption" in
+	psk*|mixed*)
+		local enc="WPA2PSK"
+		case "$encryption" in
+			psk | psk+*) enc=WPAPSK;;
+			psk2 | psk2*) enc=WPA2PSK;;
+			mixed*) enc=WPAPSKWPA2PSK;;
+			wpa | wpa+*) eap=1; enc=WPA;;
+			wpa2*) eap=1; enc=WPA2;;
+		esac
+		local crypto="AES"
+		case "$encryption" in
+			*tkip+aes*) crypto=TKIPAES;;
+			*tkip*) crypto=TKIP;;
+		esac
+		#[ "$eap" = "1" ] && {
+		# No settings here for now
+		#}
+		iwpriv $ifname set ApCliAuthMode=$enc
+		iwpriv $ifname set ApCliEncrypType=$crypto
+		;;
+	wep)
+		iwpriv $ifname set ApCliAuthMode=WEP
+		iwpriv $ifname set ApCliEncrypType=WEP
+		;;
+	none)
+		iwpriv $ifname set ApCliAuthMode=NONE
+		iwpriv $ifname set ApCliEncrypType=NONE
+		;;
+	esac
+	
+	iwpriv $ifname set "ApCliSsid=$ssid"
+	iwpriv $ifname set "ApCliWPAPSK=$key"
 	iwpriv $ifname set ApCliEnable=1
 
 	wireless_add_vif "$name" "$ifname"
