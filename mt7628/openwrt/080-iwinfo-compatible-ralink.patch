@@ -11,7 +11,7 @@
  IWINFO_LUA_LDFLAGS = $(LDFLAGS) -shared -L. -liwinfo -llua
 --- a/iwinfo_ralink.c
 +++ b/iwinfo_ralink.c
-@@ -0,0 +1,200 @@
+@@ -0,0 +1,244 @@
 +/*
 + * iwinfo - Wireless Information Library - Linux Wireless Extension Backend
 + *
@@ -41,6 +41,7 @@
 +#include <string.h>
 +#include <stdlib.h>
 +#include <unistd.h>
++#include <ctype.h>
 +
 +#define BUFFER_SIZE 0x4000
 +
@@ -76,6 +77,50 @@
 +
 +    return system_s(res, size, cmd);
 +}
++
++// Find index of token
++int indexOf(char* values, const char* find) {
++	const char *ptr = strstr(values, find);
++	if (ptr) {
++		return ptr - values;
++	}
++	return -1;
++}
++
++// Get Substring
++char* substring(const char* str, size_t begin, size_t len) {
++	if (str == 0 || strlen(str) == 0 || strlen(str) < begin || strlen(str) < (begin + len))
++		return 0;
++
++	//return strndup(str + begin, len);
++
++	char *to = (char*)malloc(len+1);
++	strncpy(to, str + begin, len);
++	to[len] = '\0';
++	return to; // Use: free(to)
++}
++
++// Trim White Space
++char *trimwhitespace(char *str)
++{
++	char *end;
++
++	// Trim leading space
++	while (isspace((unsigned char)*str)) str++;
++
++	if (*str == 0)  // All spaces?
++		return str;
++
++	// Trim trailing space
++	end = str + strlen(str) - 1;
++	while (end > str && isspace((unsigned char)*end)) end--;
++
++	// Write new null terminator character
++	end[1] = '\0';
++
++	return str;
++}
++
 +
 +// check input is ssid or mac address.
 +int is_ssid(char *ssid)
@@ -138,70 +183,69 @@
 +    *len = 0;       // output buffer length is zero.
 +
 +    char *line, *curt = strdup(res);
++    int channel_index, ssid_index, bssid_index, security_index, signal_index, wmode_index;
 +    int count = 0;
 +    for (line = strsep(&curt, "\n"); line != NULL; line = strsep(&curt, "\n")) {
-+        if (count++ < 2 || *line == 0)
-+            continue;
++	// Skip first line
++	if (count++ < 1 || *line == 0)
++		continue;
 +
-+        char *col, *curl = strdup(line), colid = 0;
++	// Find Columns
++	if (count == 2) {
++		channel_index = indexOf(line, "Ch");
++		ssid_index = indexOf(line, "SSID");
++		bssid_index = indexOf(line, "BSSID");
++		security_index = indexOf(line, "Security");
++		signal_index = indexOf(line, "Siganl(%)");
++		wmode_index = indexOf(line, "W-Mode");
++
++		count++;
++		continue;
++	}
++
++ 	char *col, *curl = strdup(line);
 +        struct iwinfo_scanlist_entry *e =
 +                (struct iwinfo_scanlist_entry *)(buf + *len);
 +        memset(e, 0, sizeof(struct iwinfo_scanlist_entry));
-+        for (col = strsep(&curl, " "); col != NULL; col = strsep(&curl, " ")) {
-+            if (*col == 0)
-+                continue;
 +
-+            // channel, ssid, mac, encrypt, signal, proto ...
-+            switch (colid++) {
-+            case 0:         // channel
-+                e->channel = atoi(col);
-+                break;
++	// Channel 
++	e->channel = atoi(substring(line, channel_index, ssid_index - channel_index));
++	
++	// SSID
++	char* ssid = trimwhitespace(substring(line, ssid_index, bssid_index - ssid_index));
++	if (strlen(ssid) != 0) {
++		snprintf(e->ssid, sizeof(e->ssid), "%s", ssid);
++	}
 +
-+            case 1:         // ssid
-+                if (is_ssid(col)) {
-+                    snprintf(e->ssid, sizeof(e->ssid), "%s", col);
-+                } else {    // it is mac address
-+                    format_mac(e->mac, col);
-+                    colid++;
-+                }
-+                break;
++	// MAC
++	format_mac(e->mac, trimwhitespace(substring(line, bssid_index, security_index - bssid_index)));
 +
-+            case 2:           // mac
-+                format_mac(e->mac, col);
-+                break;
++	// Crypto
++	char* crypto = trimwhitespace(substring(line, security_index, signal_index - security_index));
++	e->crypto.enabled = strstr(crypto, "NONE") ? 0 : 1;
 +
-+            case 3:
-+                e->crypto.enabled = strstr(col, "NONE") ? 0 : 1;
++        if (strstr(crypto, "TKIP"))
++            e->crypto.group_ciphers |= IWINFO_CIPHER_TKIP;
++        if (strstr(crypto, "AES"))
++            e->crypto.group_ciphers |= IWINFO_CIPHER_CCMP;  // FIXME?
 +
-+                if (strstr(col, "TKIP"))
-+                    e->crypto.group_ciphers |= IWINFO_CIPHER_TKIP;
-+                if (strstr(col, "AES"))
-+                    e->crypto.group_ciphers |= IWINFO_CIPHER_CCMP;  // FIXME?
++        if (strstr(crypto, "WPA1"))
++            e->crypto.wpa_version |= 1;
++        if (strstr(crypto, "WPA2"))
++            e->crypto.wpa_version |= 2;
 +
-+                if (strstr(col, "WPA1"))
-+                    e->crypto.wpa_version |= 1;
-+                if (strstr(col, "WPA2"))
-+                    e->crypto.wpa_version |= 2;
++        if (strstr(crypto, "PSK"))
++            e->crypto.auth_suites = IWINFO_KMGMT_PSK;
++        // 802.1X and NONE also is a choice of suite, not supported.
 +
-+                if (strstr(col, "PSK"))
-+                    e->crypto.auth_suites = IWINFO_KMGMT_PSK;
-+                // 802.1X and NONE also is a choice of suite, not supported.
-+                break;
++	// Signal
++        e->signal = atoi(trimwhitespace(substring(line, signal_index, wmode_index - signal_index)));
++        e->quality = format_quality(e->signal);
++        e->quality_max = 100;
 +
-+            case 4:
-+                e->signal = atoi(col);
-+                e->quality = format_quality(e->signal);
-+                e->quality_max = 100;
-+                break;
++	// deal with other..
++	e->mode = IWINFO_OPMODE_MASTER;
 +
-+            case 5:         // deal with other..
-+                e->mode = IWINFO_OPMODE_MASTER;
-+                break;
-+
-+            default:
-+                break;
-+            }
-+        }
 +        free(curl);
 +
 +        // move to next.
@@ -212,3 +256,4 @@
 +}
 +
 +
+
