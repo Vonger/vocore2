@@ -325,31 +325,6 @@ diff -Naur a/src/embedded/include/os/rt_drv.h b/src/embedded/include/os/rt_drv.h
  
  
  #define DBGPRINT_ERR(Fmt)           \
-diff -Naur a/src/embedded/common/cmm_info.c b/src/embedded/common/cmm_info.c
---- a/src/embedded/common/cmm_info.c    2015-02-27 14:13:11.000000000 +0800
-+++ b/src/embedded/common/cmm_info.c    2018-04-15 14:08:52.595106936 +0800
-@@ -93,12 +93,10 @@
- {
- #ifdef CONFIG_AP_SUPPORT
- 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
--		MTWF_LOG(DBG_CAT_ALL, DBG_SUBCAT_ALL, DBG_LVL_OFF, ("Driver version-%s %s %s\n", AP_DRIVER_VERSION, __DATE__, __TIME__));
- #endif /* CONFIG_AP_SUPPORT */
- 
- #ifdef CONFIG_STA_SUPPORT
- 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
--		MTWF_LOG(DBG_CAT_ALL, DBG_SUBCAT_ALL, DBG_LVL_OFF, ("Driver version-%s %s %s\n", STA_DRIVER_VERSION, __DATE__, __TIME__));
- #endif /* CONFIG_STA_SUPPORT */
- 
- #ifdef CONFIG_ANDES_SUPPORT
-@@ -3123,7 +3121,7 @@
- 			Rssi_Quality = (UINT)(((Rssi + 90) * 26)/10);
- 		else    /* < -84 dbm*/
- 			Rssi_Quality = 0;
--		sprintf(msg+strlen(msg),"%-9d", Rssi_Quality);
-+		sprintf(msg+strlen(msg),"%-9d", Rssi);
- 
- 		/* Wireless Mode*/
- 		wireless_mode = NetworkTypeInUseSanity(pBss);
 diff -Naur a/src/embedded/os/linux/rt_linux.c b/src/embedded/os/linux/rt_linux.c
 --- a/src/embedded/os/linux/rt_linux.c  2015-02-27 14:13:06.000000000 +0800
 +++ b/src/embedded/os/linux/rt_linux.c  2018-04-15 14:08:52.231085804 +0800
@@ -395,4 +370,109 @@ diff -Naur a/src/embedded/os/linux/rt_linux.c b/src/embedded/os/linux/rt_linux.c
 +		return kernel_write(osfd, pDataPtr, (size_t) writeLen, &osfd->f_pos);
  }
  
+ 
+diff -Naur a/src/embedded/common/cmm_info.c b/src/embedded/common/cmm_info.c
+--- a/src/embedded/common/cmm_info.c	2015-02-27 14:13:11.000000000 +0800
++++ b/src/embedded/common/cmm_info.c	2018-08-16 00:56:26.284085067 +0800
+@@ -93,12 +93,10 @@
+ {
+ #ifdef CONFIG_AP_SUPPORT
+ 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+-		MTWF_LOG(DBG_CAT_ALL, DBG_SUBCAT_ALL, DBG_LVL_OFF, ("Driver version-%s %s %s\n", AP_DRIVER_VERSION, __DATE__, __TIME__));
+ #endif /* CONFIG_AP_SUPPORT */
+ 
+ #ifdef CONFIG_STA_SUPPORT
+ 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
+-		MTWF_LOG(DBG_CAT_ALL, DBG_SUBCAT_ALL, DBG_LVL_OFF, ("Driver version-%s %s %s\n", STA_DRIVER_VERSION, __DATE__, __TIME__));
+ #endif /* CONFIG_STA_SUPPORT */
+ 
+ #ifdef CONFIG_ANDES_SUPPORT
+@@ -2995,7 +2993,7 @@
+ 	NDIS_802_11_AUTHENTICATION_MODE	ap_auth_mode = Ndis802_11AuthModeOpen;
+ 
+ 		/*Channel*/
+-		sprintf(msg+strlen(msg),"%-4d", pBss->Channel);
++		sprintf(msg+strlen(msg),"%-3d|", pBss->Channel);
+ 
+ 
+ 		/*SSID*/
+@@ -3009,10 +3007,10 @@
+ 		for (idx = 0; (idx < 14) && (idx < pBss->SsidLen); idx++)
+ 			sprintf(Ssid + 2 + (idx*2), "%02X", (UCHAR)pBss->Ssid[idx]);
+ 	}
+-		sprintf(msg+strlen(msg),"%-33s", Ssid);
++		sprintf(msg+strlen(msg),"%-32s|", Ssid);
+ 
+ 		/*BSSID*/
+-		sprintf(msg+strlen(msg),"%02x:%02x:%02x:%02x:%02x:%02x   ",
++		sprintf(msg+strlen(msg),"%02x:%02x:%02x:%02x:%02x:%02x  |",
+ 			pBss->Bssid[0],
+ 			pBss->Bssid[1],
+ 			pBss->Bssid[2],
+@@ -3111,7 +3109,7 @@
+ 			sprintf(SecurityStr, "%s/%s", GetAuthMode((CHAR)ap_auth_mode), GetEncryptType((CHAR)ap_cipher));
+ 	}
+ 
+-	sprintf(msg+strlen(msg), "%-23s", SecurityStr);
++	sprintf(msg+strlen(msg), "%-22s|", SecurityStr);
+ 
+ 		/* Rssi*/
+ 		Rssi = (INT)pBss->Rssi;
+@@ -3123,44 +3121,44 @@
+ 			Rssi_Quality = (UINT)(((Rssi + 90) * 26)/10);
+ 		else    /* < -84 dbm*/
+ 			Rssi_Quality = 0;
+-		sprintf(msg+strlen(msg),"%-9d", Rssi_Quality);
++		sprintf(msg+strlen(msg),"%-7d|", Rssi);
+ 
+ 		/* Wireless Mode*/
+ 		wireless_mode = NetworkTypeInUseSanity(pBss);
+ 		if (wireless_mode == Ndis802_11FH ||
+ 			wireless_mode == Ndis802_11DS)
+-			sprintf(msg+strlen(msg),"%-7s", "11b");
++			sprintf(msg+strlen(msg),"%-8s|", "11b");
+ 		else if (wireless_mode == Ndis802_11OFDM5)
+-			sprintf(msg+strlen(msg),"%-7s", "11a");
++			sprintf(msg+strlen(msg),"%-8s|", "11a");
+ 		else if (wireless_mode == Ndis802_11OFDM5_N)
+-			sprintf(msg+strlen(msg),"%-7s", "11a/n");
++			sprintf(msg+strlen(msg),"%-8s|", "11a/n");
+ 		else if (wireless_mode == Ndis802_11OFDM24)
+-			sprintf(msg+strlen(msg),"%-7s", "11b/g");
++			sprintf(msg+strlen(msg),"%-8s|", "11b/g");
+ 		else if (wireless_mode == Ndis802_11OFDM24_N)
+-			sprintf(msg+strlen(msg),"%-7s", "11b/g/n");
++			sprintf(msg+strlen(msg),"%-8s|", "11b/g/n");
+ 		else
+-			sprintf(msg+strlen(msg),"%-7s", "unknow");
++			sprintf(msg+strlen(msg),"%-8s|", "unknow");
+ 
+ 		/* Ext Channel*/
+ 		if (pBss->AddHtInfoLen > 0)
+ 		{
+ 			if (pBss->AddHtInfo.AddHtInfo.ExtChanOffset == EXTCHA_ABOVE)
+-				sprintf(msg+strlen(msg),"%-7s", " ABOVE");
++				sprintf(msg+strlen(msg),"%-6s|", "ABOVE");
+ 			else if (pBss->AddHtInfo.AddHtInfo.ExtChanOffset == EXTCHA_BELOW)
+-				sprintf(msg+strlen(msg),"%-7s", " BELOW");
++				sprintf(msg+strlen(msg),"%-6s|", "BELOW");
+ 			else
+-				sprintf(msg+strlen(msg),"%-7s", " NONE");
++				sprintf(msg+strlen(msg),"%-6s|", "NONE");
+ 		}
+ 		else
+ 		{
+-			sprintf(msg+strlen(msg),"%-7s", " NONE");
++			sprintf(msg+strlen(msg),"%-6s|", "NONE");
+ 		}
+ 
+ 		/*Network Type		*/
+ 		if (pBss->BssType == BSS_ADHOC)
+-			sprintf(msg+strlen(msg),"%-3s", " Ad");
++			sprintf(msg+strlen(msg),"%-2s|", "Ad");
+ 		else
+-			sprintf(msg+strlen(msg),"%-3s", " In");
++			sprintf(msg+strlen(msg),"%-2s|", "In");
+ 
+         sprintf(msg+strlen(msg),"\n");
  
