@@ -11,7 +11,7 @@
  IWINFO_LUA_LDFLAGS = $(LDFLAGS) -shared -L. -liwinfo -llua
 --- a/iwinfo_ralink.c
 +++ b/iwinfo_ralink.c
-@@ -0,0 +1,244 @@
+@@ -0,0 +1,220 @@
 +/*
 + * iwinfo - Wireless Information Library - Linux Wireless Extension Backend
 + *
@@ -79,7 +79,7 @@
 +}
 +
 +// Find index of token
-+int indexOf(char* values, const char* find) {
++int index_of(char* values, const char* find) {
 +	const char *ptr = strstr(values, find);
 +	if (ptr) {
 +		return ptr - values;
@@ -87,40 +87,16 @@
 +	return -1;
 +}
 +
-+// Get Substring
-+char* substring(const char* str, size_t begin, size_t len) {
-+	if (str == 0 || strlen(str) == 0 || strlen(str) < begin || strlen(str) < (begin + len))
-+		return 0;
-+
-+	//return strndup(str + begin, len);
-+
-+	char *to = (char*)malloc(len+1);
-+	strncpy(to, str + begin, len);
-+	to[len] = '\0';
-+	return to; // Use: free(to)
-+}
-+
-+// Trim White Space
-+char *trimwhitespace(char *str)
-+{
-+	char *end;
-+
-+	// Trim leading space
-+	while (isspace((unsigned char)*str)) str++;
-+
-+	if (*str == 0)  // All spaces?
-+		return str;
-+
++// Get Column String with trimmed spaces
++char* get_column(char* line, int col_start, int col_end) {
 +	// Trim trailing space
-+	end = str + strlen(str) - 1;
-+	while (end > str && isspace((unsigned char)*end)) end--;
-+
-+	// Write new null terminator character
-+	end[1] = '\0';
-+
-+	return str;
++	while (col_end > col_start && isspace(line[col_end])) col_end--;
++	int size = col_end - col_start + 2; // +2 = +1 offset +1 null terminator
++	char* ret = (char*)malloc(size);
++	snprintf(ret, size, "%s", line + col_start);
++	ret[size] = '\0'; // Add NULL terminator
++	return ret;
 +}
-+
 +
 +// check input is ssid or mac address.
 +int is_ssid(char *ssid)
@@ -192,12 +168,12 @@
 +
 +	// Find Columns
 +	if (count == 2) {
-+		channel_index = indexOf(line, "Ch");
-+		ssid_index = indexOf(line, "SSID");
-+		bssid_index = indexOf(line, "BSSID");
-+		security_index = indexOf(line, "Security");
-+		signal_index = indexOf(line, "Siganl(%)");
-+		wmode_index = indexOf(line, "W-Mode");
++		channel_index = index_of(line, "Ch");
++		ssid_index = index_of(line, "SSID");
++		bssid_index = index_of(line, "BSSID");
++		security_index = index_of(line, "Security");
++		signal_index = index_of(line, "Siganl(%)");
++		wmode_index = index_of(line, "W-Mode");
 +
 +		count++;
 +		continue;
@@ -209,19 +185,19 @@
 +        memset(e, 0, sizeof(struct iwinfo_scanlist_entry));
 +
 +	// Channel 
-+	e->channel = atoi(substring(line, channel_index, ssid_index - channel_index));
++	e->channel = atoi(get_column(line, channel_index, ssid_index - 1));
 +	
 +	// SSID
-+	char* ssid = trimwhitespace(substring(line, ssid_index, bssid_index - ssid_index));
++	char* ssid = get_column(line, ssid_index, bssid_index - 1);
 +	if (strlen(ssid) != 0) {
 +		snprintf(e->ssid, sizeof(e->ssid), "%s", ssid);
 +	}
 +
 +	// MAC
-+	format_mac(e->mac, trimwhitespace(substring(line, bssid_index, security_index - bssid_index)));
++	format_mac(e->mac, get_column(line, bssid_index, security_index - 1));
 +
 +	// Crypto
-+	char* crypto = trimwhitespace(substring(line, security_index, signal_index - security_index));
++	char* crypto = get_column(line, security_index, signal_index - 1);
 +	e->crypto.enabled = strstr(crypto, "NONE") ? 0 : 1;
 +
 +        if (strstr(crypto, "TKIP"))
@@ -239,7 +215,7 @@
 +        // 802.1X and NONE also is a choice of suite, not supported.
 +
 +	// Signal
-+        e->signal = atoi(trimwhitespace(substring(line, signal_index, wmode_index - signal_index)));
++        e->signal = atoi(get_column(line, signal_index, wmode_index - 1));
 +        e->quality = format_quality(e->signal);
 +        e->quality_max = 100;
 +
