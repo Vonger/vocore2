@@ -1,0 +1,138 @@
+diff -Naur a/sound/soc/codecs/es8328.c b/sound/soc/codecs/es8328.c
+--- a/sound/soc/codecs/es8328.c
++++ b/sound/soc/codecs/es8328.c
+@@ -39,6 +39,19 @@
+ 	.list	= rates_12288,
+ };
+ 
++static const unsigned int rates_12000[] = {
++	8000, 12000, 16000, 24000, 32000, 44100, 48000, 96000,
++};
++
++static const int ratios_12000[] = {
++	27, 24, 23, 21, 20, 19, 18, 16,
++};
++
++static const struct snd_pcm_hw_constraint_list constraints_12000 = {
++	.count	= ARRAY_SIZE(rates_12000),
++	.list	= rates_12000,
++};
++
+ static const unsigned int rates_11289[] = {
+ 	8018, 11025, 22050, 44100, 88200,
+ };
+@@ -552,6 +565,28 @@
+ 	return snd_soc_update_bits(codec, reg, ES8328_RATEMASK, ratio);
+ }
+ 
++static int es8328_search_clock(struct snd_soc_codec *codec, int clk)
++{
++	int clocks[] = {12000000, 24000000, 11289600, 22579200, 12288000, 24576000};
++	int i;
++
++	for (i = 0; i < sizeof(clocks) / sizeof(int); i++) {
++		int cur = clk - clocks[i];
++		cur = cur > 0 ? cur : -cur;
++
++		/* if the clock is too far from request clock, skip. */
++		if (cur < clocks[i] / 1000)
++			break;
++	}
++
++	if (i == sizeof(clocks) / sizeof(int)) {
++		dev_err(codec->dev, "no fit clock find.\n");
++		return 0;
++	}
++
++	return clocks[i];
++}
++
+ static int es8328_set_sysclk(struct snd_soc_dai *codec_dai,
+ 		int clk_id, unsigned int freq, int dir)
+ {
+@@ -559,11 +594,18 @@
+ 	struct es8328_priv *es8328 = snd_soc_codec_get_drvdata(codec);
+ 	int mclkdiv2 = 0;
+ 
+-	switch (freq) {
++	switch (es8328_search_clock(codec, freq)) {
+ 	case 0:
+ 		es8328->sysclk_constraints = NULL;
+ 		es8328->mclk_ratios = NULL;
+ 		break;
++	case 24000000:
++		mclkdiv2 = 1;
++		/* fallthru */
++	case 12000000:
++		es8328->sysclk_constraints = &constraints_12000;
++		es8328->mclk_ratios = ratios_12000;
++		break;
+ 	case 22579200:
+ 		mclkdiv2 = 1;
+ 		/* fallthru */
+@@ -770,6 +812,51 @@
+ 	return 0;
+ }
+ 
++char hex2char(char c)
++{
++	if (c >= '0' && c <= '9')
++		c = c - '0';
++	else if (c >= 'a' && c <= 'f')
++		c = c - 'a' + 10;
++	else if (c >= 'A' && c <= 'F')
++		c = c - 'A' + 10;
++	return c;
++}
++
++static struct snd_soc_codec *es8328_codec;
++static ssize_t es8328_i2cwrite_store(struct device *dev,struct device_attribute *attr,const char *buf, size_t count)
++{
++	struct snd_soc_codec *codec = es8328_codec;
++	int reg, val;
++
++	if (count != 5)
++		return count;
++
++	reg = (hex2char(buf[0]) << 4) + hex2char(buf[1]);
++	val = (hex2char(buf[2]) << 4) + hex2char(buf[3]);
++	snd_soc_write(codec, reg, val);
++
++	dev_info(dev, "%02x %02x\n", reg, val);
++	return count;
++}
++static DEVICE_ATTR(i2cwrite, S_IWUSR, NULL, es8328_i2cwrite_store);
++
++static ssize_t es8328_i2cread_store(struct device *dev,struct device_attribute *attr,const char *buf, size_t count)
++{
++	struct snd_soc_codec *codec = es8328_codec;
++	int reg, val;
++
++	if (count != 3)
++		return count;
++
++	reg = (hex2char(buf[0]) << 4) + hex2char(buf[1]);
++	val = snd_soc_read(codec, reg);
++
++	dev_info(dev, "%02x %02x\n", reg, val);
++	return count;
++}
++static DEVICE_ATTR(i2cread, S_IWUSR, NULL, es8328_i2cread_store);
++
+ static int es8328_codec_probe(struct snd_soc_codec *codec)
+ {
+ 	struct es8328_priv *es8328;
+@@ -784,6 +871,13 @@
+ 		return ret;
+ 	}
+ 
++	// FIXME: we should use system clock but not hard code clock in i2s driver.
++	// 0x27/0x2a set to 0x80, 0x1a/0x1b set to 0x00, 0x2e/0x2f set to 0x1e
++	device_create_file(codec->dev, &dev_attr_i2cwrite);
++	device_create_file(codec->dev, &dev_attr_i2cread);
++	es8328_codec = codec;
++	return 0;
++
+ 	/* Setup clocks */
+ 	es8328->clk = devm_clk_get(codec->dev, NULL);
+ 	if (IS_ERR(es8328->clk)) {
