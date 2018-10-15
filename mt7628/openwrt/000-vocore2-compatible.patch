@@ -75,7 +75,7 @@ diff -Naur a/target/linux/ramips/base-files/etc/board.d/01_leds b/target/linux/r
  	ucidef_set_led_netdev "eth" "ETH" "vocore:orange:eth" "eth0"
  	;;
 +vocore2)
-+        set_wifi_led "$boardname:red:status" "ra0"
++        set_wifi_led "$boardname:fuchsia:status" "ra0"
 +        ;;
 +vocore2lite)
 +        set_wifi_led "$boardname:green:status" "ra0"
