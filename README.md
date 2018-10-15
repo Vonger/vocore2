@@ -46,6 +46,7 @@ cp ./package/kernel/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/pa
 - Base System -> select wireless-tools (need its iwpriv)
 - Network(option): unselect wapd-mini/hostapd-common (mt7628.ko already have WPA support)
 - Global build settings(option): Kernel build options -> /dev/mem virtual device support(enable /dev/mem for easy debug)
+- Global build settings(option): unselect Cryptographically signed package lists (this will block compile)
 
 
 4. compile and enjoy!
