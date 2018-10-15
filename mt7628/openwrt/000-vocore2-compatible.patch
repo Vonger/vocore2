@@ -55,22 +55,6 @@ diff -Naru a/package/base-files/files/etc/shadow b/package/base-files/files/etc/
  daemon:*:0:0:99999:7:::
  ftp:*:0:0:99999:7:::
  network:*:0:0:99999:7:::
-diff -Naur a/target/linux/ramips/base-files/etc/board.d/01_leds b/target/linux/ramips/base-files/etc/board.d/01_leds
---- a/target/linux/ramips/base-files/etc/board.d/01_leds
-+++ b/target/linux/ramips/base-files/etc/board.d/01_leds
-@@ -446,10 +446,10 @@
- 	set_wifi_led "vocore:green:status"
- 	;;
- vocore2)
--	set_wifi_led "$boardname:fuchsia:status"
-+	set_wifi_led "$boardname:fuchsia:status" "ra0"
- 	;;
- vocore2lite)
--	set_wifi_led "$boardname:green:status"
-+	set_wifi_led "$boardname:green:status" "ra0"
- 	;;
- w502u)
- 	set_usb_led "$boardname:blue:usb"
 diff -Naru a/target/linux/ramips/dts/VOCORE2.dts b/target/linux/ramips/dts/VOCORE2.dts
 --- a/target/linux/ramips/dts/VOCORE2.dts
 +++ b/target/linux/ramips/dts/VOCORE2.dts
@@ -83,3 +67,19 @@ diff -Naru a/target/linux/ramips/dts/VOCORE2.dts b/target/linux/ramips/dts/VOCOR
 +       status = "okay";
 +       mediatek,cd-poll;
 +};
+diff -Naur a/target/linux/ramips/base-files/etc/board.d/01_leds b/target/linux/ramips/base-files/etc/board.d/01_leds
+--- a/target/linux/ramips/base-files/etc/board.d/01_leds
++++ b/target/linux/ramips/base-files/etc/board.d/01_leds
+@@ -360,6 +360,12 @@
+ vocore-16M)
+ 	ucidef_set_led_netdev "eth" "ETH" "vocore:orange:eth" "eth0"
+ 	;;
++vocore2)
++        set_wifi_led "$boardname:red:status" "ra0"
++        ;;
++vocore2lite)
++        set_wifi_led "$boardname:green:status" "ra0"
++        ;;
+ w502u)
+ 	set_wifi_led "rt2800pci-phy0::radio"
+ 	;;
