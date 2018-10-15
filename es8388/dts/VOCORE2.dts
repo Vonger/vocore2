@@ -9,7 +9,10 @@
 	model = "VoCore2";
 
 	aliases {
-		led-status = &led_status;
+		led-boot = &led_status;
+		led-failsafe = &led_status;
+		led-running = &led_status;
+		led-upgrade = &led_status;
 	};
 
 	gpio-leds {
@@ -44,21 +47,21 @@
 		};
 	};
 
-        i2c-gpio {
-                compatible = "i2c-gpio";
+	i2c-gpio {
+		compatible = "i2c-gpio";
 
-                gpios = <&gpio0 5 0 &gpio0 4 0>;
-                i2c-gpio,delay-us = <5>;
+		gpios = <&gpio0 5 0 &gpio0 4 0>;
+		i2c-gpio,delay-us = <5>;
 
-                codec: es8388@10 {
-                        #sound-dai-cells = <0>;
-                        compatible = "everest,es8328";
-                        reg = <0x10>;
+		codec: es8388@10 {
+			#sound-dai-cells = <0>;
+			compatible = "everest,es8328";
+			reg = <0x10>;
 
-                        clocks = <&clkctrl 20>;
-                        clock-names = "refclk";
-                };
-        };
+			clocks = <&clkctrl 20>;
+			clock-names = "refclk";
+		};
+	};
 };
 
 &spi0 {
