@@ -1,11 +1,11 @@
---- a/package/feeds/luci/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
-+++ b/package/feeds/luci/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
-@@ -660,7 +660,7 @@
- 			"and ad-hoc mode) to be installed."
- 		)
- 	end
--elseif hwtype == "broadcom" then
-+elseif hwtype == "broadcom" or hwtype == "ralink" then
- 	encr:value("psk", "WPA-PSK")
- 	encr:value("psk2", "WPA2-PSK")
- 	encr:value("psk+psk2", "WPA-PSK/WPA2-PSK Mixed Mode")
+--- a/feeds/luci/modules/luci-mod-network/luasrc/model/cbi/admin_network/wifi.lua
++++ b/feeds/luci/modules/luci-mod-network/luasrc/model/cbi/admin_network/wifi.lua
+@@ -654,6 +654,8 @@
+ encr:value("none", "No Encryption")
+ encr:value("wep-open",   translate("WEP Open System"), {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"}, {mode="ahdemo"}, {mode="wds"})
+ encr:value("wep-shared", translate("WEP Shared Key"),  {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"}, {mode="ahdemo"}, {mode="wds"})
++encr:value("psk", "WPA-PSK", {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"})
++encr:value("psk2", "WPA2-PSK", {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"})
+ 
+ if hwtype == "mac80211" or hwtype == "prism2" then
+ 	local supplicant = fs.access("/usr/sbin/wpa_supplicant")
