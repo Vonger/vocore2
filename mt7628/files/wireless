@@ -20,8 +20,8 @@ config wifi-iface sta
 	option mode	sta
 	option network  wwan
 	option ifname   apcli0
-	option ssid	"[STA SSID]"
-	option key	"[STA PASS]"
-	option encryption psk
+	option ssid	""
+	option key	""
+	option encryption psk2
 	option disabled	1
 
