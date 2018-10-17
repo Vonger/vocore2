@@ -13,4 +13,4 @@ echo setting to one antenna...
 cp /dev/mtd2 /tmp/mtd2
 change_byte /tmp/mtd2 52 11
 mtd -e factory write /tmp/mtd2 factory 2> /dev/null
-echo done, please reboot to make it valid.
+echo done, please call "firstboot -y" to make it valid.
