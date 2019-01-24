@@ -61,6 +61,20 @@ patch -p1 < ./package/kernel/mt7628/openwrt/luci/*.patch
 
 details please check http://vonger.cn/?p=14525
 
+2. fix refclk patch
+
+```
+cp ./package/kernel/mt7628/openwrt/882-* ./target/linux/ramips/patches-4.14
+```
+
+This patch will able to use refclk in DTS file, old version name conflict.
+I should submit it to openwrt, not yet :)
+
+3. add flash id
+
+```
+cp ./package/kernel/mt7628/openwrt/0306-* ./target/linux/ramips/patches-4.14
+```
 
 # Known Issue + TODO
 
