@@ -1,6 +1,6 @@
 --- a/drivers/mtd/devices/m25p80.c
 +++ b/drivers/mtd/devices/m25p80.c 
-@@ -27,6 +27,17 @@
+@@ -27,6 +27,18 @@
  #include <linux/spi/flash.h>
  #include <linux/mtd/spi-nor.h>
  
@@ -14,6 +14,7 @@
 +		return sprintf(buf, "\n");
 +	return sprintf(buf, "%08X%08X\n", ((u32 *)fid)[0], ((u32 *)fid)[1]);
 +}
++static DEVICE_ATTR(fid, S_IRUGO, m25p80_fid, NULL);
 +
  #define	MAX_CMD_SIZE		6
  struct m25p {
