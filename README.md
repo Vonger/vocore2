@@ -70,11 +70,13 @@ cp ./package/kernel/mt7628/openwrt/882-* ./target/linux/ramips/patches-4.14
 This patch will able to use refclk in DTS file, old version name conflict.
 I should submit it to openwrt, not yet :)
 
-3. add flash id
+3. add unique flash id
 
 ```
 cp ./package/kernel/mt7628/openwrt/0306-* ./target/linux/ramips/patches-4.14
 ```
+
+In /sys folder you can find a file named factory_id, that id is bind to flash and fixed and unique for every VoCore2. 
 
 # Known Issue + TODO
 
