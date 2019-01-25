@@ -120,31 +120,6 @@
 +config 'mount'
 +	option  device  '/mnt/mmcblk0p1'
 +	option  enabled '1'
---- a/target/linux/ramips/patches-4.14/0307-suppress-mmc-warning.patch
-+++ b/target/linux/ramips/patches-4.14/0307-suppress-mmc-warning.patch 
-@@ -0,0 +1,22 @@
-+--- a/drivers/mmc/core/sdio.c
-++++ b/drivers/mmc/core/sdio.c
-+@@ -1182,9 +1182,6 @@
-+ err:
-+ 	mmc_detach_bus(host);
-+ 
-+-	pr_err("%s: error %d whilst initialising SDIO card\n",
-+-		mmc_hostname(host), err);
-+-
-+ 	return err;
-+ }
-+ 
-+--- a/drivers/mmc/core/core.c
-++++ b/drivers/mmc/core/core.c
-+@@ -1450,7 +1450,6 @@
-+ 
-+ 	ocr &= host->ocr_avail;
-+ 	if (!ocr) {
-+-		dev_warn(mmc_dev(host), "no support for card's volts\n");
-+ 		return 0;
-+ 	}
-+ 
 --- a/target/linux/ramips/patches-4.14/0306-spi-flash-factory-id.patch
 +++ b/target/linux/ramips/patches-4.14/0306-spi-flash-factory-id.patch
 @@ -0,0 +1,29 @@
@@ -200,3 +175,50 @@
 + 				1, MT7628_GPIO_MODE_GPIO),
 + 	GRP_G("wled_an", wled_an_grp_mt7628, MT7628_GPIO_MODE_MASK,
 + 				1, MT7628_GPIO_MODE_WLED_AN),
+--- a/target/linux/ramips/patches-4.14/0307-suppress-mmc-warning.patch
++++ b/target/linux/ramips/patches-4.14/0307-suppress-mmc-warning.patch
+@@ -0,0 +1,44 @@
++--- a/drivers/mmc/core/core.c
+++++ b/drivers/mmc/core/core.c
++@@ -1450,7 +1450,6 @@
++ 
++ 	ocr &= host->ocr_avail;
++ 	if (!ocr) {
++-		dev_warn(mmc_dev(host), "no support for card's volts\n");
++ 		return 0;
++ 	}
++ 
++--- a/drivers/mmc/core/sd.c
+++++ b/drivers/mmc/core/sd.c
++@@ -1256,8 +1256,5 @@
++ err:
++ 	mmc_detach_bus(host);
++ 
++-	pr_err("%s: error %d whilst initialising SD card\n",
++-		mmc_hostname(host), err);
++-
++ 	return err;
++ }
++--- a/drivers/mmc/core/sdio.c
+++++ b/drivers/mmc/core/sdio.c
++@@ -1182,9 +1182,6 @@
++ err:
++ 	mmc_detach_bus(host);
++ 
++-	pr_err("%s: error %d whilst initialising SDIO card\n",
++-		mmc_hostname(host), err);
++-
++ 	return err;
++ }
++ 
++--- a/drivers/mmc/core/mmc.c
+++++ b/drivers/mmc/core/mmc.c
++@@ -2179,8 +2179,5 @@
++ err:
++ 	mmc_detach_bus(host);
++ 
++-	pr_err("%s: error %d whilst initialising MMC card\n",
++-		mmc_hostname(host), err);
++-
++ 	return err;
++ }
