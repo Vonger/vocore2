@@ -29,23 +29,6 @@
 +endef
 +
 +$(eval $(call KernelPackage,sound-mt7628))
---- a/target/linux/ramips/dts/VOCORE2.dtsi
-+++ b/target/linux/ramips/dts/VOCORE2.dtsi
-@@ -12,9 +12,13 @@
- &pinctrl {
- 	state_default: pinctrl0 {
- 		gpio {
--			ralink,group = "wled_an", "refclk", "wdt";
-+			ralink,group = "wled_an", "wdt", "i2c";
- 			ralink,function = "gpio";
- 		};
-+		refclk {
-+			ralink,group = "gpio0";
-+			ralink,function = "gpio refclk";
-+		};
- 	};
- };
- 
 --- a/target/linux/ramips/dts/VOCORE2.dts
 +++ b/target/linux/ramips/dts/VOCORE2.dts
 @@ -16,6 +16,45 @@
@@ -94,3 +77,28 @@
  };
  
  &spi0 {
+--- a/target/linux/ramips/dts/VOCORE2.dtsi
++++ b/target/linux/ramips/dts/VOCORE2.dtsi
+@@ -12,9 +12,13 @@
+ &pinctrl {
+ 	state_default: pinctrl0 {
+ 		gpio {
+-			ralink,group = "wled_an", "refclk", "wdt";
++			ralink,group = "wled_an", "wdt", "i2c";
+ 			ralink,function = "gpio";
+ 		};
++		refclk {
++			ralink,group = "gpio0";
++			ralink,function = "gpio refclk";
++		};
+ 	};
+ };
+ 
+@@ -33,6 +37,7 @@
+ };
+ 
+ &i2s {
++	#sound-dai-cells = <0>;
+ 	status = "okay";
+ };
+ 
