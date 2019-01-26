@@ -61,7 +61,7 @@ patch -p1 < ./package/kernel/mt7628/openwrt/luci/*.patch
 
 details please check http://vonger.cn/?p=14525
 
-2. fix refclk patch
+2. fix refclk patch(default now)
 
 ```
 cp ./package/kernel/mt7628/openwrt/882-* ./target/linux/ramips/patches-4.14
@@ -70,13 +70,21 @@ cp ./package/kernel/mt7628/openwrt/882-* ./target/linux/ramips/patches-4.14
 This patch will able to use refclk in DTS file, old version name conflict.
 I should submit it to openwrt, not yet :)
 
-3. add unique flash id
+3. add unique flash id(default now)
 
 ```
 cp ./package/kernel/mt7628/openwrt/0306-* ./target/linux/ramips/patches-4.14
 ```
 
-In /sys folder you can find a file named factory_id, that id is bind to flash and fixed and unique for every VoCore2. 
+In /sys folder you can find a file named fid, that id is bind to flash and fixed and unique for every VoCore2. 
+
+4. support es8388 for VoCore2 Ultimate
+
+```
+patch -p1 < ./package/kernel/es8388/openwrt/000-*.patch
+cp ./package/kernel/es8388/openwrt/810*.patch ./target/linux/ramips/patches-4.14
+```
+
 
 # Known Issue + TODO
 
