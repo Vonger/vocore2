@@ -63,45 +63,6 @@
 +       status = "okay";
 +       mediatek,cd-poll;
 +};
---- a/target/linux/ramips/base-files/etc/board.d/01_leds
-+++ b/target/linux/ramips/base-files/etc/board.d/01_leds
-@@ -360,6 +360,12 @@
- vocore-16M)
- 	ucidef_set_led_netdev "eth" "ETH" "vocore:orange:eth" "eth0"
- 	;;
-+vocore2)
-+        set_wifi_led "$boardname:fuchsia:status" "ra0"
-+        ;;
-+vocore2lite)
-+        set_wifi_led "$boardname:green:status" "ra0"
-+        ;;
- w502u)
- 	set_wifi_led "rt2800pci-phy0::radio"
- 	;;
---- a/target/linux/ramips/patches-4.14/814-sd-cd-poll.patch
-+++ b/target/linux/ramips/patches-4.14/814-sd-cd-poll.patch
-@@ -0,0 +1,21 @@
-+--- a/drivers/mmc/host/mtk-mmc/sd.c
-++++ b/drivers/mmc/host/mtk-mmc/sd.c
-+@@ -440,6 +440,8 @@
-+ 	else
-+ 		inserted = (status & MSDC_PS_CDSTS) ? 1 : 0;
-+ 
-++	if (host->mmc->caps & MMC_CAP_NEEDS_POLL)
-++		inserted = 1;
-+ #if 0
-+ 	change = host->card_inserted ^ inserted;
-+ 	host->card_inserted = inserted;
-+@@ -1857,6 +1859,9 @@
-+ 			present = (sdr_read32(MSDC_PS) & MSDC_PS_CDSTS) ? 0 : 1;
-+ 		else
-+ 			present = (sdr_read32(MSDC_PS) & MSDC_PS_CDSTS) ? 1 : 0;
-++
-++		if (host->mmc->caps & MMC_CAP_NEEDS_POLL)
-++			present = 1;
-+ 		host->card_inserted = present;
-+ #endif
-+ 		spin_unlock_irqrestore(&host->lock, flags);
 --- a/package/base-files/files/etc/config/fstab
 +++ b/package/base-files/files/etc/config/fstab
 @@ -0,0 +1,15 @@
@@ -229,6 +190,24 @@
 -#
 -# src/gz example_feed_name http://www.example.com/path/to/files
 +src/gz openwrt_pack http://downloads.openwrt.org/releases/18.06.1/packages/mipsel_24kc/packages
-+src/gz openwrt_luci http://downloads.openwrt.org/releases/18.06.1/packages/mipsel_24kc/luci 
++src/gz openwrt_luci http://downloads.openwrt.org/releases/18.06.1/packages/mipsel_24kc/luci
 +src/gz openwrt_rout http://downloads.openwrt.org/releases/18.06.1/packages/mipsel_24kc/routing 
 +src/gz openwrt_tele http://downloads.openwrt.org/releases/18.06.1/packages/mipsel_24kc/telephony 
+--- a/target/linux/ramips/base-files/etc/board.d/01_leds
++++ b/target/linux/ramips/base-files/etc/board.d/01_leds
+@@ -446,11 +446,11 @@
+ 	set_wifi_led "vocore:green:status"
+ 	;;
+ vocore2)
+-	set_wifi_led "$boardname:fuchsia:status"
+-	;;
++	set_wifi_led "$boardname:fuchsia:status" "ra0"
++	;;
+ vocore2lite)
+-	set_wifi_led "$boardname:green:status"
+-	;;
++	set_wifi_led "$boardname:green:status" "ra0"
++	;;
+ w502u)
+ 	set_usb_led "$boardname:blue:usb"
+ 	set_wifi_led "rt2800pci-phy0::radio"
