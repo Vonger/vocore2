@@ -1,6 +1,6 @@
 --- a/feeds/luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
 +++ b/feeds/luci/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
-@@ -654,6 +654,8 @@
+@@ -633,6 +633,8 @@
  encr:value("none", "No Encryption")
  encr:value("wep-open",   translate("WEP Open System"), {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"}, {mode="ahdemo"}, {mode="wds"})
  encr:value("wep-shared", translate("WEP Shared Key"),  {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"}, {mode="ahdemo"}, {mode="wds"})
