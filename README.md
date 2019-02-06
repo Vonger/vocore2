@@ -15,26 +15,26 @@ For faster speed and more security.
 
 # How to use it
 
-1. add this feeds to your openwrt source.
+1. add this feeds to your openwrt source(support 18.06.02).
 
 ```
-cd ~/openwrt
-cp feeds.conf.default feeds.conf
-echo src-git vocore2 https://github.com/vonger/vocore2.git >> feeds.conf
-./scripts/feeds update vocore2
-cp -r ./feeds/vocore2/mt7628 ./package/kernel
+git clone https://github.com/openwrt/openwrt.git
+git checkout v18.06.2
+cd path/to/openwrt
+path/to/openwrt/scripts/feeds update luci
+path/to/openwrt/scripts/feeds install -a -p luci
+cd path/to/openwrt/package
+git clone https://github.com/vonger/vocore2.git
 ```
-
-FIXME: I have no idea why `./scripts/feeds install -a -p vocore2` not work...
 
 2. patch your openwrt with necessary patches to use this driver.
 
 ```
-cd ~/openwrt
-patch -p1 < ./package/kernel/mt7628/openwrt/000-*.patch
+cd path/to/openwrt
+patch -p1 < path/to/openwrt/package/vocore2/mt7628/openwrt/000-*.patch
 
-mkdir ./package/network/utils/iwinfo/patches
-cp ./package/kernel/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/patches
+mkdir path/to/openwrt/package/network/utils/iwinfo/patches
+cp path/to/openwrt/package/kernel/mt7628/openwrt/080-*.patch path/to/openwrt/package/network/utils/iwinfo/patches
 ```
 
 
