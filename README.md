@@ -5,7 +5,6 @@ This feed enable using MTK/Ralink official wifi driver for the latest linux kern
 Feel free to submit patch and bug or email me at support@vocore.io
 
 This patch is only for study/personal usage, and only for VoCore2, it might burn your house, launch nuke, kill a baby... use it carefully and risk is on you. 
-Source code of mt7628 is from internet.
 
 For details tutorial, please check vonger.cn, Beginner Tutorial.
 
@@ -45,11 +44,11 @@ cp path/to/openwrt/package/vocore2/mt7628/openwrt/080-*.patch path/to/openwrt/pa
 
 - Target System: MediaTek Ralink MIPS
 - Subtarget: MT76x8 based boards
+- Target Profile: VoCore VoCore2
 - Kernel modules -> Wireless Drivers -> unselect kmod-mt76 / select kmod-mt7628 -> select WiFi Operation Mode -> enable AP-Client support for AP+STA mode; enable SNIFFER for monitor mode.
 - Base System -> select wireless-tools (need its iwpriv)
-- Network(option): unselect wapd-mini/hostapd-common (mt7628.ko already have WPA support)
+- Network(option): unselect wapd-mini / hostapd-common (mt7628.ko already have WPA support)
 - Global build settings(option): Kernel build options -> /dev/mem virtual device support(enable /dev/mem for easy debug)
-- Global build settings(option): unselect Cryptographically signed package lists (this will block compile)
 
 
 4. compile and enjoy!
@@ -59,8 +58,8 @@ cp path/to/openwrt/package/vocore2/mt7628/openwrt/080-*.patch path/to/openwrt/pa
 1. support es8388 for VoCore2 Ultimate
 
 ```
-patch -p1 < path/to/package/vocore2/es8388/openwrt/000-*.patch
-cp path/to/package/vocore2/es8388/openwrt/810*.patch path/to/openwrt/target/linux/ramips/patches-4.14
+patch -p1 < path/to/openwrt/package/vocore2/es8388/openwrt/000-*.patch
+cp path/to/openwrt/package/vocore2/es8388/openwrt/810*.patch path/to/openwrt/target/linux/ramips/patches-4.14
 ```
 
 
