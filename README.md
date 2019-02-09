@@ -4,7 +4,7 @@ This feed enable using MTK/Ralink official wifi driver for the latest linux kern
 
 Feel free to submit patch and bug or email me at support@vocore.io
 
-This patch is only for study/personal usage, and only for VoCore2, it might burn your house, launch nuke, etc... please use it carefully and risk is on you. 
+This patch is only for study/personal usage, and only for VoCore2, it might burn your house, launch nuke, kill a baby... use it carefully and risk is on you. 
 Source code of mt7628 is from internet.
 
 For details tutorial, please check vonger.cn, Beginner Tutorial.
