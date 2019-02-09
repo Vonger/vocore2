@@ -207,3 +207,14 @@
  }
  
  generate_switch_vlans_ports() {
+--- a/target/linux/ramips/base-files/etc/board.d/02_network
++++ b/target/linux/ramips/base-files/etc/board.d/02_network
+@@ -349,7 +349,7 @@
+ 	vocore2|\
+ 	vocore2lite)
+ 		ucidef_add_switch "switch0" \
+-			"0:lan" "2:lan" "6t@eth0"
++			"0:lan" "6t@eth0"
+ 		;;
+ 	f5d8235-v1|\
+ 	tew-714tru|\
