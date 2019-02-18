@@ -155,10 +155,11 @@
 + }
 --- a/package/system/opkg/files/customfeeds.conf
 +++ b/package/system/opkg/files/customfeeds.conf
-@@ -1,3 +1,3 @@
+@@ -1,3 +1,4 @@
 -# add your custom package feeds here
 -#
 -# src/gz example_feed_name http://www.example.com/path/to/files
++src/gz openwrt_luci http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/luci
 +src/gz openwrt_pack http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/packages
 +src/gz openwrt_rout http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/routing 
 +src/gz openwrt_tele http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/telephony 
@@ -218,3 +219,13 @@
  		;;
  	f5d8235-v1|\
  	tew-714tru|\
+--- a/package/system/opkg/Makefile
++++ b/package/system/opkg/Makefile
+@@ -89,7 +89,6 @@ define Package/opkg/install
+        $(INSTALL_BIN) ./files/20_migrate-feeds $(1)/etc/uci-defaults/
+        $(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/opkg-cl $(1)/bin/opkg
+   ifneq ($(CONFIG_SIGNED_PACKAGES),)
+-       echo "option check_signature" >> $(1)/etc/opkg.conf
+   endif
+        $(INSTALL_DIR) $(1)/usr/sbin
+        $(INSTALL_BIN) ./files/opkg-key $(1)/usr/sbin/

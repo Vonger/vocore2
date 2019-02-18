@@ -274,6 +274,7 @@ ralink_teardown() {
 	json_get_vars ifname
 	json_select ..
 
+	iwpriv apcli0 set ApCliEnable=0
 	ifconfig $ifname down
 }
 
