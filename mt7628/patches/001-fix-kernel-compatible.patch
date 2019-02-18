@@ -362,6 +362,15 @@ diff -Naur a/src/embedded/os/linux/rt_linux.c b/src/embedded/os/linux/rt_linux.c
  #endif
  #endif /* CONFIG_RALINK_FLASH_API */
  }
+@@ -346,7 +346,7 @@
+ #ifdef RA_MTD_RW_BY_NUM
+ 	ra_mtd_write(MTD_NUM_FACTORY, 0, (size_t) b, p);
+ #else
+-	ra_mtd_write_nm("Factory", a&0xFFFF, (size_t) b, p);
++	ra_mtd_write_nm("factory", a&0xFFFF, (size_t) b, p);
+ #endif
+ #endif /* CONFIG_RALINK_FLASH_API */
+ }
 @@ -479,7 +479,6 @@
  	struct sk_buff *pRxPkt, *pClonedPkt;
  
