@@ -155,11 +155,10 @@
 + }
 --- a/package/system/opkg/files/customfeeds.conf
 +++ b/package/system/opkg/files/customfeeds.conf
-@@ -1,3 +1,4 @@
+@@ -1,3 +1,3 @@
 -# add your custom package feeds here
 -#
 -# src/gz example_feed_name http://www.example.com/path/to/files
-+src/gz openwrt_luci http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/luci
 +src/gz openwrt_pack http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/packages
 +src/gz openwrt_rout http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/routing 
 +src/gz openwrt_tele http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/telephony 
