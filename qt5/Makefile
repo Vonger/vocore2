@@ -133,7 +133,6 @@ define Build/Configure
 			-make libs \
 			-nomake examples \
 			-nomake tests \
-			-skip qtdeclarative \
 			-skip qtmultimedia \
 			-skip activeqt \
 			-skip qtdoc \
