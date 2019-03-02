@@ -1,4 +1,4 @@
---- a/target/linux/ramips/patches-4.14/801-mt7628-kernel-wext-oldapi.patch
+--- /dev/null
 +++ b/target/linux/ramips/patches-4.14/801-mt7628-kernel-wext-oldapi.patch
 @@ -0,0 +1,13 @@
 +diff -Naru a/net/wireless/wext-core.c b/net/wireless/wext-core.c
@@ -51,7 +51,7 @@
 +config 'mount'
 +	option  device  '/mnt/mmcblk0p1'
 +	option  enabled '1'
---- a/target/linux/ramips/patches-4.14/0306-spi-flash-factory-id.patch
+--- /dev/null
 +++ b/target/linux/ramips/patches-4.14/0306-spi-flash-factory-id.patch
 @@ -0,0 +1,29 @@
 +--- a/drivers/mtd/devices/m25p80.c
@@ -83,7 +83,7 @@
 + 	return mtd_device_register(&nor->mtd, data ? data->parts : NULL,
 + 				   data ? data->nr_parts : 0);
 + }
---- a/target/linux/ramips/patches-4.14/882-pinctrl-fix-refclk-name.patch
+--- /dev/null
 +++ b/target/linux/ramips/patches-4.14/882-pinctrl-fix-refclk-name.patch
 @@ -0,0 +1,20 @@
 +--- a/arch/mips/ralink/mt7620.c
@@ -106,7 +106,7 @@
 + 				1, MT7628_GPIO_MODE_GPIO),
 + 	GRP_G("wled_an", wled_an_grp_mt7628, MT7628_GPIO_MODE_MASK,
 + 				1, MT7628_GPIO_MODE_WLED_AN),
---- a/target/linux/ramips/patches-4.14/0307-suppress-mmc-warning.patch
+--- /dev/null
 +++ b/target/linux/ramips/patches-4.14/0307-suppress-mmc-warning.patch
 @@ -0,0 +1,44 @@
 +--- a/drivers/mmc/core/core.c
