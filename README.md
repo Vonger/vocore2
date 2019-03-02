@@ -9,12 +9,9 @@ This patch is only for study/personal usage, and only for VoCore2, it might burn
 For details tutorial, please check vonger.cn, Beginner Tutorial.
 
 
-# Why use Linux 4.14
-
-For faster speed and more security.
-
-
 # How to use it
+
+Please follow the steps in order to avoid issue. "path/to/" is your openwrt location.
 
 1. add this feeds to your openwrt source(support 18.06.02).
 
@@ -38,6 +35,8 @@ patch -p1 < path/to/openwrt/package/vocore2/mt7628/openwrt/luci/*.patch
 mkdir path/to/openwrt/package/network/utils/iwinfo/patches
 cp path/to/openwrt/package/vocore2/mt7628/openwrt/080-*.patch path/to/openwrt/package/network/utils/iwinfo/patches
   ```
+  
+  note: patch for iwinfo might broken wifi driver based on 802.11(such as USB WiFi), but it is necessary to make mt7628 works with uci system. In futher, I consider to add patch to make mt7628 driver support 802.11.
 
 
 3. config mt7628 in `make menuconfig` Kernel modules -> Wireless Drivers -> kmod-mt7628
@@ -53,7 +52,8 @@ cp path/to/openwrt/package/vocore2/mt7628/openwrt/080-*.patch path/to/openwrt/pa
 
 4. compile and enjoy!
 
-### Option
+
+### Option (Sound)
 
 1. support es8388 (sound card on VoCore2 Ultimate) for VoCore2 Ultimate
 
@@ -63,6 +63,3 @@ cp path/to/openwrt/package/vocore2/es8388/openwrt/810*.patch path/to/openwrt/tar
   ```
   - Kernel modules -> Sound Support -> select kmod-sound-core and kmod-sound-mt7628
 
-# Thank you
-
-Thanks to all openwrt contributors! Hope we can make wireless more freedom and better :p
