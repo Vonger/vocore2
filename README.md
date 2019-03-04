@@ -62,4 +62,7 @@ patch -p1 < path/to/openwrt/package/vocore2/es8388/openwrt/000-*.patch
 cp path/to/openwrt/package/vocore2/es8388/openwrt/810*.patch path/to/openwrt/target/linux/ramips/patches-4.14
   ```
   - Kernel modules -> Sound Support -> select kmod-sound-core and kmod-sound-mt7628
+  - Kernel modules -> I2C support -> unselect kmod-i2c-mt7628, select kmod-i2c-gpio-custom
+  
+note: kmod-i2c-mt7628 do not support some of the i2c features, so i2c-tools can not read from it. because i2c is a slow interface and with little data to transfer, so we can directly use gpio i2c for easy debug, but kmod-i2c-mt7628 should works too.
 
