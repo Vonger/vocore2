@@ -218,18 +218,6 @@
  		;;
  	f5d8235-v1|\
  	tew-714tru|\
---- a/package/system/opkg/Makefile
-+++ b/package/system/opkg/Makefile
-@@ -88,9 +88,6 @@
- 	$(INSTALL_DATA) ./files/opkg$(2).conf $(1)/etc/opkg.conf
- 	$(INSTALL_BIN) ./files/20_migrate-feeds $(1)/etc/uci-defaults/
- 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/opkg-cl $(1)/bin/opkg
--  ifneq ($(CONFIG_SIGNED_PACKAGES),)
--	echo "option check_signature" >> $(1)/etc/opkg.conf
--  endif
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) ./files/opkg-key $(1)/usr/sbin/
- endef
 --- a/package/base-files/files/etc/banner
 +++ b/package/base-files/files/etc/banner
 @@ -1,8 +1,9 @@
