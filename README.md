@@ -39,7 +39,7 @@ cp path/to/openwrt/package/vocore2/mt7628/openwrt/080-*.patch path/to/openwrt/pa
   note: patch for iwinfo might broken wifi driver based on 802.11(such as USB WiFi), but it is necessary to make mt7628 works with uci system. In futher, I consider to add patch to make mt7628 driver support 802.11.
 
 
-3. config mt7628 in `make menuconfig` Kernel modules -> Wireless Drivers -> kmod-mt7628
+3. you can direct ***cp path/to/openwrt/package/vocore/.config path/to/openwrt/*** or ***config mt7628 in `make menuconfig` *** 
 
   - Target System: MediaTek Ralink MIPS
   - Subtarget: MT76x8 based boards
@@ -49,13 +49,7 @@ cp path/to/openwrt/package/vocore2/mt7628/openwrt/080-*.patch path/to/openwrt/pa
   - Network(option): unselect wapd-mini then hostapd-common (mt7628.ko already have WPA support)
   - Global build settings(option): Kernel build options -> /dev/mem virtual device support(enable /dev/mem for easy debug)
 
-
-4. compile and enjoy!
-
-
-### Option (Sound)
-
-1. support es8388 (sound card on VoCore2 Ultimate) for VoCore2 Ultimate
+4. support es8388 (sound card on VoCore2 Ultimate) for VoCore2 Ultimate
 
   ```sh
 patch -p1 < path/to/openwrt/package/vocore2/es8388/openwrt/000-*.patch
@@ -66,3 +60,4 @@ cp path/to/openwrt/package/vocore2/es8388/openwrt/810*.patch path/to/openwrt/tar
   
 note: kmod-i2c-mt7628 do not support some of the i2c features, so i2c-tools can not read from it. because i2c is a slow interface and with little data to transfer, so we can directly use gpio i2c for easy debug, but kmod-i2c-mt7628 should works too.
 
+5. compile and enjoy!
