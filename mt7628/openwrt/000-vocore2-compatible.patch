@@ -155,11 +155,12 @@
 + }
 --- a/package/system/opkg/files/customfeeds.conf
 +++ b/package/system/opkg/files/customfeeds.conf
-@@ -1,3 +1,3 @@
+@@ -1,3 +1,4 @@
 -# add your custom package feeds here
 -#
 -# src/gz example_feed_name http://www.example.com/path/to/files
 +src/gz openwrt_pack http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/packages
++src/gz openwrt_luci http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/luci
 +src/gz openwrt_rout http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/routing 
 +src/gz openwrt_tele http://downloads.openwrt.org/releases/18.06.2/packages/mipsel_24kc/telephony 
 --- a/target/linux/ramips/base-files/etc/board.d/01_leds
@@ -188,13 +189,14 @@
  				*) ipad=${ipaddr:-"192.168.$((addr_offset++)).1"} ;;
  			esac
  
-@@ -142,6 +142,18 @@
+@@ -142,6 +142,19 @@
  			}
  		;;
  	esac
 +
 +	uci -q batch <<-EOF
 +		add_list firewall.@zone[1].network="wwan"
++		set firewall.@zone[1].input='ACCEPT'
 +		set wireless.ap.ssid=VoCore2-`hexdump -C /dev/mtd2 | head -1 | awk '{print $10$11}'`
 +		set network.wan=interface
 +		set network.wan.ifname=eth0.2
