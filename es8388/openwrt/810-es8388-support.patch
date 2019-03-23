@@ -39,7 +39,7 @@
 +	}
 +
 +	if (i == sizeof(clocks) / sizeof(int)) {
-+		dev_err(codec->dev, "no fit clock find.\n");
++		dev_err(codec->dev, "no fit clock find for %d.\n", clk);
 +		return 0;
 +	}
 +
