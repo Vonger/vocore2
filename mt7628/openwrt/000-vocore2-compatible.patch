@@ -237,3 +237,14 @@
   -----------------------------------------------------
   %D %V, %C
   -----------------------------------------------------
+--- a/toolchain/gdb/Makefile
++++ b/toolchain/gdb/Makefile
+@@ -45,7 +45,7 @@ HOST_CONFIGURE_ARGS = \
+ 	--without-included-gettext \
+ 	--enable-threads \
+ 	--with-expat \
+-	--without-python \
++	--with-python \
+ 	--disable-binutils \
+ 	--disable-ld \
+ 	--disable-gas \
