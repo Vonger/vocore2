@@ -19,9 +19,9 @@ Please follow the steps in order to avoid issue. "path/to/" is your openwrt loca
 git clone https://github.com/openwrt/openwrt.git
 git checkout v18.06.2
 cd path/to/openwrt
-path/to/openwrt/scripts/feeds update luci
-path/to/openwrt/scripts/feeds install -a -p luci
-cd path/to/openwrt/package
+./scripts/feeds update luci
+./scripts/feeds install -a -p luci
+cd ./package
 git clone https://github.com/vonger/vocore2.git
   ```
 
@@ -29,17 +29,16 @@ git clone https://github.com/vonger/vocore2.git
 
   ```sh
 cd path/to/openwrt
-patch -p1 < path/to/openwrt/package/vocore2/mt7628/openwrt/000-*.patch
-patch -p1 < path/to/openwrt/package/vocore2/mt7628/openwrt/luci/*.patch
-
-mkdir path/to/openwrt/package/network/utils/iwinfo/patches
-cp path/to/openwrt/package/vocore2/mt7628/openwrt/080-*.patch path/to/openwrt/package/network/utils/iwinfo/patches
+patch -p1 < ./package/vocore2/mt7628/openwrt/000-*.patch
+patch -p1 < ./package/vocore2/mt7628/openwrt/luci/*.patch
+mkdir ./package/network/utils/iwinfo/patches
+cp ./package/vocore2/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/patches
   ```
   
   note: patch for iwinfo might broken wifi driver based on 802.11(such as USB WiFi), but it is necessary to make mt7628 works with uci system. In futher, I consider to add patch to make mt7628 driver support 802.11.
 
 
-3. you can direct ***cp path/to/openwrt/package/vocore/.config path/to/openwrt/*** or ***config mt7628 in `make menuconfig` *** 
+3. you can direct `cp ./package/vocore/.config ./` ***OR*** configure mt7628 in `make menuconfig`
 
   - Target System: MediaTek Ralink MIPS
   - Subtarget: MT76x8 based boards
@@ -52,12 +51,13 @@ cp path/to/openwrt/package/vocore2/mt7628/openwrt/080-*.patch path/to/openwrt/pa
 4. support es8388 (sound card on VoCore2 Ultimate) for VoCore2 Ultimate
 
   ```sh
-patch -p1 < path/to/openwrt/package/vocore2/es8388/openwrt/000-*.patch
-cp path/to/openwrt/package/vocore2/es8388/openwrt/810*.patch path/to/openwrt/target/linux/ramips/patches-4.14
+cd path/to/openwrt
+patch -p1 < ./package/vocore2/es8388/openwrt/000-*.patch
+cp ./package/vocore2/es8388/openwrt/810*.patch ./target/linux/ramips/patches-4.14
   ```
   - Kernel modules -> Sound Support -> select kmod-sound-core and kmod-sound-mt7628
   - Kernel modules -> I2C support -> unselect kmod-i2c-mt7628, select kmod-i2c-gpio-custom
   
-note: kmod-i2c-mt7628 do not support some of the i2c features, so i2c-tools can not read from it. because i2c is a slow interface and with little data to transfer, so we can directly use gpio i2c for easy debug, but kmod-i2c-mt7628 should works too.
+	note: kmod-i2c-mt7628 do not support some of the i2c features, so i2c-tools can not read from it. because i2c is a slow interface and with little data to transfer, so we can directly use gpio i2c for easy debug, but kmod-i2c-mt7628 should works too.
 
 5. compile and enjoy!
