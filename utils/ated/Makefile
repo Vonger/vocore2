@@ -19,7 +19,7 @@ include $(INCLUDE_DIR)/kernel.mk
 
 define Package/ated
   SECTION:=vocore2
-  CATEGORY:=VoCore2 Features
+  CATEGORY:=VoCore2
   TITLE:=ATE Daemon
 endef
 

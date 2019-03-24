@@ -11,7 +11,7 @@ include $(INCLUDE_DIR)/kernel.mk
 
 define Package/mem
   SECTION:=vocore2
-  CATEGORY:=VoCore2 Features
+  CATEGORY:=VoCore2
   TITLE:=Modify registers from user space
 endef
 
