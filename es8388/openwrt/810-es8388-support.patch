@@ -20,41 +20,12 @@
  static const unsigned int rates_11289[] = {
  	8018, 11025, 22050, 44100, 88200,
  };
-@@ -552,6 +565,28 @@
- 	return snd_soc_update_bits(codec, reg, ES8328_RATEMASK, ratio);
- }
- 
-+static int es8328_search_clock(struct snd_soc_codec *codec, int clk)
-+{
-+	int clocks[] = {12000000, 24000000, 11289600, 22579200, 12288000, 24576000};
-+	int i;
-+
-+	for (i = 0; i < sizeof(clocks) / sizeof(int); i++) {
-+		int cur = clk - clocks[i];
-+		cur = cur > 0 ? cur : -cur;
-+
-+		/* if the clock is too far from request clock, skip. */
-+		if (cur < clocks[i] / 1000)
-+			break;
-+	}
-+
-+	if (i == sizeof(clocks) / sizeof(int)) {
-+		dev_err(codec->dev, "no fit clock find for %d.\n", clk);
-+		return 0;
-+	}
-+
-+	return clocks[i];
-+}
-+
- static int es8328_set_sysclk(struct snd_soc_dai *codec_dai,
- 		int clk_id, unsigned int freq, int dir)
- {
-@@ -559,11 +594,18 @@
+@@ -559,11 +572,19 @@
  	struct es8328_priv *es8328 = snd_soc_codec_get_drvdata(codec);
  	int mclkdiv2 = 0;
  
--	switch (freq) {
-+	switch (es8328_search_clock(codec, freq)) {
++	freq = 12000000;	// fixed for vocore2.
+ 	switch (freq) {
  	case 0:
  		es8328->sysclk_constraints = NULL;
  		es8328->mclk_ratios = NULL;
@@ -69,7 +40,7 @@
  	case 22579200:
  		mclkdiv2 = 1;
  		/* fallthru */
-@@ -784,26 +826,18 @@
+@@ -784,26 +805,18 @@
  		return ret;
  	}
  

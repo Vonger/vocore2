@@ -25,9 +25,9 @@ define Package/dosbox/description
 endef
 
 define Build/Configure
-	( cd $(PKG_BUILD_DIR) ; \
-		TARGET_CC="$(TARGET_CROSS)gcc" \
-		./configure --host=mipsel-openwrt-linux\
+	( cd $(PKG_BUILD_DIR); \
+	  TARGET_CC="$(TARGET_CROSS)gcc" \
+	  ./configure --host=mipsel-openwrt-linux \
 	)
 endef
 

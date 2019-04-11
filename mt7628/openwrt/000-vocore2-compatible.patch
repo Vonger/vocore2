@@ -45,11 +45,11 @@
 +	option	check_fs	'0'
 +
 +config 'mount'
-+	option	device	'/mnt/sda1'
++	option	device	'/dev/sda1'
 +	option	enabled	'1'
 +
 +config 'mount'
-+	option  device  '/mnt/mmcblk0p1'
++	option  device  '/dev/mmcblk0p1'
 +	option  enabled '1'
 --- /dev/null
 +++ b/target/linux/ramips/patches-4.14/0306-spi-flash-factory-id.patch
