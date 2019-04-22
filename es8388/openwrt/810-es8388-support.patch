@@ -20,28 +20,27 @@
  static const unsigned int rates_11289[] = {
  	8018, 11025, 22050, 44100, 88200,
  };
-@@ -511,8 +524,16 @@
- 	} else {
- 		ratio = 0;
- 		es8328->mclkdiv2 = 0;
-+
-+		for (i = 0; i < constraints_12000.count; i++)
-+			if (constraints_12000.list[i] == params_rate(params))
-+				break;
-+		if (i != constraints_12000.count)
-+			ratio = ratios_12000[i];
- 	}
+@@ -312,6 +325,7 @@
+ 			ES8328_ADCPOWER_MIC_BIAS_OFF, 1, NULL, 0),
+ 	SND_SOC_DAPM_SUPPLY("Mic Bias Gen", ES8328_ADCPOWER,
+ 			ES8328_ADCPOWER_ADC_BIAS_GEN_OFF, 1, NULL, 0),
++	SND_SOC_DAPM_SUPPLY("Mic L Mono", ES8328_DACCONTROL21, 7, 0, NULL, 0),
  
-+	dev_info(codec->dev, "es8328_hw_params reg: %02x radio: %d\n", reg, ratio);
-+
- 	snd_soc_update_bits(codec, ES8328_MASTERMODE,
- 			ES8328_MASTERMODE_MCLKDIV2,
- 			es8328->mclkdiv2 ? ES8328_MASTERMODE_MCLKDIV2 : 0);
-@@ -559,11 +580,19 @@
+ 	SND_SOC_DAPM_SUPPLY("DAC STM", ES8328_CHIPPOWER,
+ 			ES8328_CHIPPOWER_DACSTM_RESET, 1, NULL, 0),
+@@ -409,6 +423,7 @@
+ 	{ "Right ADC", NULL, "ADC DIG" },
+ 
+ 	{ "Mic Bias", NULL, "Mic Bias Gen" },
++	{ "Mic Bias", NULL, "Mic L Mono" },
+ 
+ 	{ "Left Line Mux", "Line 1", "LINPUT1" },
+ 	{ "Left Line Mux", "Line 2", "LINPUT2" },
+@@ -559,11 +574,19 @@
  	struct es8328_priv *es8328 = snd_soc_codec_get_drvdata(codec);
  	int mclkdiv2 = 0;
  
-+	freq = 12000000;	// fixed for vocore2.
++	freq = 12000000;	/* fixed for vocore2.*/
  	switch (freq) {
  	case 0:
  		es8328->sysclk_constraints = NULL;
@@ -57,55 +56,7 @@
  	case 22579200:
  		mclkdiv2 = 1;
  		/* fallthru */
-@@ -611,6 +640,7 @@
- 	default:
- 		return -EINVAL;
- 	}
-+	dev_info(codec->dev, "es8328_set_dai_fmt master %d", es8328->master);
- 
- 	/* interface format */
- 	switch (fmt & SND_SOC_DAIFMT_FORMAT_MASK) {
-@@ -770,6 +800,39 @@
- 	return 0;
- }
- 
-+char hex2char(char c)
-+{
-+	if (c >= '0' && c <= '9')
-+		c = c - '0';
-+	else if (c >= 'a' && c <= 'f')
-+		c = c - 'a' + 10;
-+	else if (c >= 'A' && c <= 'F')
-+		c = c - 'A' + 10;
-+	return c;
-+}
-+
-+static struct snd_soc_codec *es8328_codec;
-+static ssize_t es8328_i2cwrite_store(struct device *dev,struct device_attribute *attr,const char *buf, size_t count)
-+{
-+	struct snd_soc_codec *codec = es8328_codec;
-+	int reg = 0, val = 0;
-+
-+	if (count == 5) {
-+		reg = (hex2char(buf[0]) << 4) + hex2char(buf[1]);
-+		val = (hex2char(buf[2]) << 4) + hex2char(buf[3]);
-+		snd_soc_write(codec, reg, val);
-+	}
-+	if (count == 3) {
-+		reg = (hex2char(buf[0]) << 4) + hex2char(buf[1]);
-+		val = snd_soc_read(codec, reg);
-+	}
-+	dev_info(dev, "%02x %02x\n", reg, val);
-+
-+	return count;
-+}
-+
-+static DEVICE_ATTR(i2cwrite, S_IWUSR, NULL, es8328_i2cwrite_store);
-+
- static int es8328_codec_probe(struct snd_soc_codec *codec)
- {
- 	struct es8328_priv *es8328;
-@@ -784,26 +847,28 @@
+@@ -784,26 +807,23 @@
  		return ret;
  	}
  
@@ -126,23 +77,18 @@
 +	snd_soc_write(codec, ES8328_ADCCONTROL5, 0x20);
 +	snd_soc_write(codec, ES8328_DACCONTROL2, 0x20);
 +
-+	/* set sound volumn to max for easy test. */
++	/* set sound play volumn to max for easy use. */
 +	snd_soc_write(codec, ES8328_DACCONTROL17, 0x80);
 +	snd_soc_write(codec, ES8328_DACCONTROL20, 0x80);
-+	snd_soc_write(codec, ES8328_DACCONTROL21, 0x80);
-+	snd_soc_write(codec, ES8328_DACCONTROL22, 0x80);
 +	snd_soc_write(codec, ES8328_DACCONTROL4, 0x00);
 +	snd_soc_write(codec, ES8328_DACCONTROL5, 0x00);
 +	snd_soc_write(codec, ES8328_LOUT1VOL, 0x1e);
 +	snd_soc_write(codec, ES8328_ROUT1VOL, 0x1e);
 +
++	/* set sound record volumn to max for easy use. */
 +	snd_soc_write(codec, ES8328_ADCCONTROL8, 0x00);
 +	snd_soc_write(codec, ES8328_ADCCONTROL9, 0x00);
-+	snd_soc_write(codec, ES8328_ADCCONTROL1, 0x00);
-+	snd_soc_write(codec, ES8328_ADCCONTROL2, 0xf0);
  
-+	device_create_file(codec->dev, &dev_attr_i2cwrite);
-+	es8328_codec = codec;
  	return 0;
 -
 -clk_fail:

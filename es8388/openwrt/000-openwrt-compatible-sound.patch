@@ -31,7 +31,7 @@
 +$(eval $(call KernelPackage,sound-mt7628))
 --- a/target/linux/ramips/dts/VOCORE2.dts
 +++ b/target/linux/ramips/dts/VOCORE2.dts
-@@ -16,6 +16,45 @@
+@@ -16,6 +16,48 @@
  			gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
  		};
  	};
@@ -40,21 +40,24 @@
 +		compatible = "simple-audio-card";
 +		simple-audio-card,name = "soundcard";
 +		simple-audio-card,format = "i2s";
++		simple-audio-card,bitclock-master = <&sound_master>;
++		simple-audio-card,frame-master = <&sound_master>;
++		simple-audio-card,mclk-fs = <272>;
 +		simple-audio-card,widgets =
 +			"Microphone", "Microphone Jack",
 +			"Headphone", "Headphone Jack";
 +		simple-audio-card,routing =
 +			"LINPUT1", "Microphone Jack",
 +			"RINPUT1", "Microphone Jack",
++			"Microphone Jack", "Mic Bias",
 +			"Headphone Jack", "LOUT1",
 +			"Headphone Jack", "ROUT1";
-+		simple-audio-card,mclk-fs = <272>;
 +
 +		simple-audio-card,cpu {
 +			sound-dai = <&i2s>;
 +		};
 +
-+		simple-audio-card,codec {
++		sound_master:simple-audio-card,codec {
 +			sound-dai = <&codec>;
 +		};
 +	};
