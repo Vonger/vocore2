@@ -12,6 +12,7 @@ For details tutorial, please check vonger.cn, Beginner Tutorial.
 # How to use it
 
 Please follow the steps in order to avoid issue. "path/to/" is your openwrt location.
+Please use Linux, MacOS or other Unix compatible system to compile it. 
 
 1. add this feeds to your openwrt source(support 18.06.02).
 
@@ -38,7 +39,7 @@ cp ./package/vocore2/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/p
   note: patch for iwinfo might broken wifi driver based on 802.11(such as USB WiFi), but it is necessary to make mt7628 works with uci system. In futher, I consider to add patch to make mt7628 driver support 802.11.
 
 
-3. you can direct `cp ./package/vocore/.config ./` ***OR*** configure mt7628 in `make menuconfig`
+3. you can direct `cp ./package/vocore2/.config ./` ***OR*** configure mt7628 in `make menuconfig`
 
   - Target System: MediaTek Ralink MIPS
   - Subtarget: MT76x8 based boards
