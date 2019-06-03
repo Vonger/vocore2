@@ -20,15 +20,35 @@
  static const unsigned int rates_11289[] = {
  	8018, 11025, 22050, 44100, 88200,
  };
-@@ -312,6 +325,7 @@
+@@ -312,26 +325,7 @@
  			ES8328_ADCPOWER_MIC_BIAS_OFF, 1, NULL, 0),
  	SND_SOC_DAPM_SUPPLY("Mic Bias Gen", ES8328_ADCPOWER,
  			ES8328_ADCPOWER_ADC_BIAS_GEN_OFF, 1, NULL, 0),
+-
+-	SND_SOC_DAPM_SUPPLY("DAC STM", ES8328_CHIPPOWER,
+-			ES8328_CHIPPOWER_DACSTM_RESET, 1, NULL, 0),
+-	SND_SOC_DAPM_SUPPLY("ADC STM", ES8328_CHIPPOWER,
+-			ES8328_CHIPPOWER_ADCSTM_RESET, 1, NULL, 0),
+-
+-	SND_SOC_DAPM_SUPPLY("DAC DIG", ES8328_CHIPPOWER,
+-			ES8328_CHIPPOWER_DACDIG_OFF, 1, NULL, 0),
+-	SND_SOC_DAPM_SUPPLY("ADC DIG", ES8328_CHIPPOWER,
+-			ES8328_CHIPPOWER_ADCDIG_OFF, 1, NULL, 0),
+-
+-	SND_SOC_DAPM_SUPPLY("DAC DLL", ES8328_CHIPPOWER,
+-			ES8328_CHIPPOWER_DACDLL_OFF, 1, NULL, 0),
+-	SND_SOC_DAPM_SUPPLY("ADC DLL", ES8328_CHIPPOWER,
+-			ES8328_CHIPPOWER_ADCDLL_OFF, 1, NULL, 0),
+-
+-	SND_SOC_DAPM_SUPPLY("ADC Vref", ES8328_CHIPPOWER,
+-			ES8328_CHIPPOWER_ADCVREF_OFF, 1, NULL, 0),
+-	SND_SOC_DAPM_SUPPLY("DAC Vref", ES8328_CHIPPOWER,
+-			ES8328_CHIPPOWER_DACVREF_OFF, 1, NULL, 0),
 +	SND_SOC_DAPM_SUPPLY("Mic L Mono", ES8328_DACCONTROL21, 7, 0, NULL, 0),
  
- 	SND_SOC_DAPM_SUPPLY("DAC STM", ES8328_CHIPPOWER,
- 			ES8328_CHIPPOWER_DACSTM_RESET, 1, NULL, 0),
-@@ -401,14 +415,8 @@
+ 	SND_SOC_DAPM_DAC("Right DAC", "Right Playback", ES8328_DACPOWER,
+ 			ES8328_DACPOWER_RDAC_OFF, 1),
+@@ -401,14 +395,8 @@
  	{ "Left ADC", NULL, "Left ADC Mux" },
  	{ "Right ADC", NULL, "Right ADC Mux" },
  
@@ -44,7 +64,7 @@
  
  	{ "Left Line Mux", "Line 1", "LINPUT1" },
  	{ "Left Line Mux", "Line 2", "LINPUT2" },
-@@ -435,13 +443,6 @@
+@@ -435,13 +423,6 @@
  	{ "Right Mixer", "Playback Switch", "Right DAC" },
  	{ "Right Mixer", "Right Bypass Switch", "Right Line Mux" },
  
@@ -58,7 +78,7 @@
  	{ "Left Out 1", NULL, "Left Mixer" },
  	{ "LOUT1", NULL, "Left Out 1" },
  	{ "Right Out 1", NULL, "Right Mixer" },
-@@ -559,11 +560,19 @@
+@@ -559,11 +540,19 @@
  	struct es8328_priv *es8328 = snd_soc_codec_get_drvdata(codec);
  	int mclkdiv2 = 0;
  
@@ -78,7 +98,7 @@
  	case 22579200:
  		mclkdiv2 = 1;
  		/* fallthru */
-@@ -770,6 +779,43 @@
+@@ -770,6 +759,43 @@
  	return 0;
  }
  
@@ -122,7 +142,7 @@
  static int es8328_codec_probe(struct snd_soc_codec *codec)
  {
  	struct es8328_priv *es8328;
-@@ -784,26 +830,30 @@
+@@ -784,26 +810,30 @@
  		return ret;
  	}
  
