@@ -28,15 +28,37 @@
  
  	SND_SOC_DAPM_SUPPLY("DAC STM", ES8328_CHIPPOWER,
  			ES8328_CHIPPOWER_DACSTM_RESET, 1, NULL, 0),
-@@ -409,6 +423,7 @@
- 	{ "Right ADC", NULL, "ADC DIG" },
+@@ -401,14 +415,8 @@
+ 	{ "Left ADC", NULL, "Left ADC Mux" },
+ 	{ "Right ADC", NULL, "Right ADC Mux" },
  
+-	{ "ADC DIG", NULL, "ADC STM" },
+-	{ "ADC DIG", NULL, "ADC Vref" },
+-	{ "ADC DIG", NULL, "ADC DLL" },
+-
+-	{ "Left ADC", NULL, "ADC DIG" },
+-	{ "Right ADC", NULL, "ADC DIG" },
+-
  	{ "Mic Bias", NULL, "Mic Bias Gen" },
 +	{ "Mic Bias", NULL, "Mic L Mono" },
  
  	{ "Left Line Mux", "Line 1", "LINPUT1" },
  	{ "Left Line Mux", "Line 2", "LINPUT2" },
-@@ -559,11 +574,19 @@
+@@ -435,13 +443,6 @@
+ 	{ "Right Mixer", "Playback Switch", "Right DAC" },
+ 	{ "Right Mixer", "Right Bypass Switch", "Right Line Mux" },
+ 
+-	{ "DAC DIG", NULL, "DAC STM" },
+-	{ "DAC DIG", NULL, "DAC Vref" },
+-	{ "DAC DIG", NULL, "DAC DLL" },
+-
+-	{ "Left DAC", NULL, "DAC DIG" },
+-	{ "Right DAC", NULL, "DAC DIG" },
+-
+ 	{ "Left Out 1", NULL, "Left Mixer" },
+ 	{ "LOUT1", NULL, "Left Out 1" },
+ 	{ "Right Out 1", NULL, "Right Mixer" },
+@@ -559,11 +560,19 @@
  	struct es8328_priv *es8328 = snd_soc_codec_get_drvdata(codec);
  	int mclkdiv2 = 0;
  
@@ -56,7 +78,51 @@
  	case 22579200:
  		mclkdiv2 = 1;
  		/* fallthru */
-@@ -784,26 +807,23 @@
+@@ -770,6 +779,43 @@
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_DEBUG_FS
++static struct snd_soc_codec *es8328_codec;
++static ssize_t es8328_dump_show(struct device *dev, struct device_attribute *attr, char *buf)
++{
++	struct snd_soc_codec *codec = es8328_codec;
++	int reg, count = 0;
++
++	for (reg = 0; reg < 64; reg++) {
++		int val = snd_soc_read(codec, reg);
++		if (val < 0) {
++			count += sprintf(buf + count, "\n");
++			break;
++		}
++		count += sprintf(buf + count, "%02x ", val);
++		if (reg && (reg % 8 == 7))
++			count += sprintf(buf + count, " ");
++		if (reg && (reg % 16 == 15))
++			count += sprintf(buf + count, "\n");
++	}
++
++	return count;
++}
++
++
++static ssize_t es8328_dump_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
++{
++	struct snd_soc_codec *codec = es8328_codec;
++	int reg, val;
++
++	sscanf(buf, "%2x:%2x", &reg, &val);
++	snd_soc_write(codec, reg, val);
++	return count;
++}
++
++static DEVICE_ATTR(dump, S_IRUGO|S_IWUSR, es8328_dump_show, es8328_dump_store);
++#endif
++
+ static int es8328_codec_probe(struct snd_soc_codec *codec)
+ {
+ 	struct es8328_priv *es8328;
+@@ -784,26 +830,30 @@
  		return ret;
  	}
  
@@ -73,6 +139,9 @@
 -		dev_err(codec->dev, "unable to prepare codec clk\n");
 -		goto clk_fail;
 -	}
++	/* default power is all on. */
++	snd_soc_write(codec, ES8328_CHIPPOWER, 0x00);
+ 
 +	/* double speed mode is necessary. */
 +	snd_soc_write(codec, ES8328_ADCCONTROL5, 0x20);
 +	snd_soc_write(codec, ES8328_DACCONTROL2, 0x20);
@@ -88,7 +157,11 @@
 +	/* set sound record volumn to max for easy use. */
 +	snd_soc_write(codec, ES8328_ADCCONTROL8, 0x00);
 +	snd_soc_write(codec, ES8328_ADCCONTROL9, 0x00);
- 
++
++#ifdef CONFIG_DEBUG_FS
++	device_create_file(codec->dev, &dev_attr_dump);
++	es8328_codec = codec;
++#endif
  	return 0;
 -
 -clk_fail:
