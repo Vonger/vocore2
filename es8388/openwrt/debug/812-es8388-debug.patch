@@ -1,0 +1,40 @@
+--- a/sound/soc/codecs/es8328.c
++++ b/sound/soc/codecs/es8328.c
+@@ -793,6 +793,28 @@
+ 	return 0;
+ }
+ 
++static struct snd_soc_codec *es8328_codec;
++static ssize_t es8328_dump_show(struct device *dev, struct device_attribute *attr, char *buf)
++{
++	struct snd_soc_codec *codec = es8328_codec;
++	int reg, count = 0;
++
++	for (reg = 0; reg < 64; reg++) {
++		int val = snd_soc_read(codec, reg);
++		if (val < 0)
++			continue;
++		count += sprintf(buf + count, "%02x ", val);
++		if (reg && (reg % 8 == 7))
++			count += sprintf(buf + count, " ");
++		if (reg && (reg % 16 == 15))
++			count += sprintf(buf + count, "\n");
++	}
++
++	return count;
++}
++
++static DEVICE_ATTR(dump, S_IRUGO, es8328_dump_show, NULL);
++
+ static int es8328_codec_probe(struct snd_soc_codec *codec)
+ {
+ 	struct es8328_priv *es8328;
+@@ -823,6 +845,8 @@
+ 	snd_soc_write(codec, ES8328_ADCCONTROL8, 0x00);
+ 	snd_soc_write(codec, ES8328_ADCCONTROL9, 0x00);
+ 
++	device_create_file(codec->dev, &dev_attr_dump);
++	es8328_codec = codec;
+ 	return 0;
+ }
+ 
