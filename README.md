@@ -6,15 +6,15 @@ Feel free to submit patch and bug or email me at support@vocore.io
 
 This patch is only for study/personal usage, and only for VoCore2, it might burn your house, launch nuke, kill a baby... use it carefully and risk is on you. 
 
-For details tutorial, please check vonger.cn, Beginner Tutorial.
+For detailed tutorial, please check vonger.cn, Beginner Tutorial.
 
 
-# How to use it
+# How to compile it
 
-Please follow the steps in order to avoid issue. "path/to/" is your openwrt location.
-Please use Linux, MacOS or other Unix compatible system to compile it. 
+Please follow my steps in order to avoid issue. "path/to/" is your openwrt location.
+Please use Linux, MacOS or other Unix compatible system to compile it, the file system must be case sensitive. 
 
-1. add this feeds to your openwrt source(support 18.06.02).
+1. add the code to your openwrt source(support 18.06.02).
 
   ```sh
 git clone https://github.com/openwrt/openwrt.git
@@ -56,6 +56,7 @@ cd path/to/openwrt
 patch -p1 < ./package/vocore2/es8388/openwrt/000-*.patch
 cp ./package/vocore2/es8388/openwrt/810*.patch ./target/linux/ramips/patches-4.14
   ```
+  
   - Kernel modules -> Sound Support -> select kmod-sound-core and kmod-sound-mt7628
   - Kernel modules -> I2C support -> unselect kmod-i2c-mt7628, select kmod-i2c-gpio-custom
   
