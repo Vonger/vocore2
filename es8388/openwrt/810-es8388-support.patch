@@ -78,7 +78,35 @@
  	{ "Left Out 1", NULL, "Left Mixer" },
  	{ "LOUT1", NULL, "Left Out 1" },
  	{ "Right Out 1", NULL, "Right Mixer" },
-@@ -559,11 +540,19 @@
+@@ -481,15 +462,9 @@
+ 	struct snd_soc_codec *codec = dai->codec;
+ 	struct es8328_priv *es8328 = snd_soc_codec_get_drvdata(codec);
+ 	int i;
+-	int reg;
+ 	int wl;
+ 	int ratio;
+ 
+-	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
+-		reg = ES8328_DACCONTROL2;
+-	else
+-		reg = ES8328_ADCCONTROL5;
+-
+ 	if (es8328->master) {
+ 		if (!es8328->sysclk_constraints) {
+ 			dev_err(codec->dev, "No MCLK configured\n");
+@@ -549,7 +524,10 @@
+ 				ES8328_ADCCONTROL4_ADCWL_MASK,
+ 				wl << ES8328_ADCCONTROL4_ADCWL_SHIFT);
+ 
+-	return snd_soc_update_bits(codec, reg, ES8328_RATEMASK, ratio);
++	// we are using same LRCLK and BCLK for record and playback.
++	snd_soc_update_bits(codec, ES8328_DACCONTROL2, ES8328_RATEMASK, ratio);
++	snd_soc_update_bits(codec, ES8328_ADCCONTROL5, ES8328_RATEMASK, ratio);
++	return 0;
+ }
+ 
+ static int es8328_set_sysclk(struct snd_soc_dai *codec_dai,
+@@ -559,11 +537,19 @@
  	struct es8328_priv *es8328 = snd_soc_codec_get_drvdata(codec);
  	int mclkdiv2 = 0;
  
@@ -98,7 +126,7 @@
  	case 22579200:
  		mclkdiv2 = 1;
  		/* fallthru */
-@@ -770,6 +759,43 @@
+@@ -770,6 +756,43 @@
  	return 0;
  }
  
@@ -142,7 +170,7 @@
  static int es8328_codec_probe(struct snd_soc_codec *codec)
  {
  	struct es8328_priv *es8328;
-@@ -784,26 +810,30 @@
+@@ -784,26 +807,30 @@
  		return ret;
  	}
  
