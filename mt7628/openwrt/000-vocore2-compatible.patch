@@ -248,3 +248,19 @@
  	--disable-binutils \
  	--disable-ld \
  	--disable-gas \
+--- a/target/linux/ramips/dts/VOCORE2.dtsi
++++ b/target/linux/ramips/dts/VOCORE2.dtsi
+@@ -20,6 +20,13 @@
+ 			ralink,function = "gpio refclk";
+ 		};
+ 	};
++
++	uart2 {
++		uart2 {
++			ralink,group = "uart2";
++			ralink,function = "pwm";
++		};
++	};
+ };
+ 
+ &wmac {
