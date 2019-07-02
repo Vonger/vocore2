@@ -24,7 +24,7 @@
  obj-$(CONFIG_I2C_RK3X)		+= i2c-rk3x.o
 --- /dev/null
 +++ b/drivers/i2c/busses/i2c-mt7621.c
-@@ -0,0 +1,280 @@
+@@ -0,0 +1,278 @@
 +/*
 + * drivers/i2c/busses/i2c-mt7628.c
 + *
@@ -172,14 +172,12 @@
 +			if (mtk_i2c_master_write(i2c, m + i) < 0)
 +				break;
 +		}
-+		mtk_i2c_trigger(i2c, SM0_MODE_STOP, 1);
 +	}
++	mtk_i2c_trigger(i2c, SM0_MODE_STOP, 1);
 +
 +	/* can not access one or more address in the i2c_msg */
-+	if (i != c) {
-+		mtk_i2c_trigger(i2c, SM0_MODE_STOP, 1);
++	if (i != c)
 +		return -ENODEV;
-+	}
 +
 +	/* the return value is number of executed messages */
 +	return i;
