@@ -170,7 +170,7 @@
  static int es8328_codec_probe(struct snd_soc_codec *codec)
  {
  	struct es8328_priv *es8328;
-@@ -784,26 +807,30 @@
+@@ -784,26 +810,33 @@
  		return ret;
  	}
  
@@ -205,6 +205,9 @@
 +	/* set sound record volumn to max for easy use. */
 +	snd_soc_write(codec, ES8328_ADCCONTROL8, 0x00);
 +	snd_soc_write(codec, ES8328_ADCCONTROL9, 0x00);
++
++	/* for LINPUT1 - RINPUT1, also enable LINPUT2 - RINPUT2 */
++	snd_soc_write(codec, ES8328_ADCCONTROL2, 0xfc);
 +
 +#ifdef CONFIG_DEBUG_FS
 +	device_create_file(codec->dev, &dev_attr_dump);
