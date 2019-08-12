@@ -1,0 +1,11 @@
+--- a/buildsystem/makefiles/Makefile.tools	2019-08-12 15:14:02.000000000 +0800
++++ b/buildsystem/makefiles/Makefile.tools	2019-08-12 15:14:30.000000000 +0800
+@@ -130,7 +130,7 @@
+   endif
+ 
+   # Search the path for the compiler
+-  toolpath_ := $(shell /bin/which $(CC__))
++  toolpath_ := $(shell which $(CC__))
+   ifeq ($(toolpath_),)
+     toolpath_ := /opt/netsurf/$(HOST)/cross/bin/
+     CC__  := $(toolpath_)$(HOST)-gcc
