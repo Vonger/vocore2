@@ -14,11 +14,11 @@ For detailed tutorial, please check vonger.cn, Beginner Tutorial.
 Please follow my steps in order to avoid issue. "path/to/" is your openwrt location.
 Please use Linux, MacOS or other Unix compatible system to compile it, the file system must be case sensitive. 
 
-1. add the code to your openwrt source(support 18.06.02).
+1. add the code to your openwrt source(support 18.06.4).
 
   ```sh
 git clone https://github.com/openwrt/openwrt.git
-git checkout v18.06.2
+git checkout v18.06.4
 cd path/to/openwrt
 ./scripts/feeds update luci
 ./scripts/feeds install -a -p luci
