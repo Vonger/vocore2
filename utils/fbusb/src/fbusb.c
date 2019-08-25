@@ -182,9 +182,11 @@ fbusb_install_firmware_error:
 static int fbusb_refresh_thread(void *data)
 {
 	struct fbusb_info *uinfo = data;
+	struct fbusb_par *par = uinfo->info->par;
 
-	// this delay make splash could show. :)
+	/* this delay make splash could show. :) */
 	ssleep(2);
+	memset(uinfo->info->screen_buffer, 0, par->screen_size);
 
 	while (!kthread_should_stop()) {
 		if (!uinfo->pause) {

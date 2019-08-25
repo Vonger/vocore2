@@ -119,7 +119,7 @@ fbusb_write(struct fb_info *info, const char __user *buf,
 #include <linux/fb.h>
 #include <asm/types.h>
 #include <asm/io.h>
-#include "fb_draw.h"
+#include "core/fb_draw.h"
 
     /*
      *  Generic bitwise copy algorithm
@@ -481,7 +481,7 @@ fbusb_copyarea(struct fb_info *p, const struct fb_copyarea *area)
 #include <linux/string.h>
 #include <linux/fb.h>
 #include <asm/types.h>
-#include "fb_draw.h"
+#include "core/fb_draw.h"
 
     /*
      *  Aligned pattern fill using 32/64-bit memory accesses
