@@ -62,3 +62,10 @@ cp ./package/vocore2/es8388/openwrt/0045-*.patch ./target/linux/ramips/patches-4
   - Kernel modules -> I2C support -> select kmod-i2c-mt7628
 
 5. compile and enjoy!
+
+
+# Setup develop enviroment(based on Qt creator)
+
+We can debug and develop based on Qt creator(or Eclipse if you like Java)
+[Tutorial Link Here]http://vonger.cn/?p=14657
+
