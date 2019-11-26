@@ -112,21 +112,26 @@ fbusb_boot_setup_error:
 	return ret;
 }
 
-static void fbusb_update_backlight(struct fbusb_info *uinfo)
+static int fbusb_update_backlight(struct fbusb_info *uinfo)
 {
 	static u16 backlight;
 	struct fbusb_par *par = uinfo->info->par;
 	u8 *cmd;
+	int ret;
 
 	if (backlight == uinfo->backlight)
-		return;
+		return 0;
 	backlight = uinfo->backlight;
 
 	cmd = kzalloc(8, GFP_KERNEL);
 	cmd[1] = 0x51;
 	cmd[2] = 0x02;
 	cmd[7] = (backlight * 255 + 50) / 100;
-	usb_control_msg(par->udev, usb_sndctrlpipe(par->udev, 0), 0xb0, 0x40,
+	ret = usb_control_msg(par->udev, usb_sndctrlpipe(par->udev, 0), 0xb0, 0x40,
 		0, 0, cmd, 8, FBUSB_MAX_DELAY);
 	kfree(cmd);
+
+	if (ret < 0)
+		return ret;
+	return 0;
 }

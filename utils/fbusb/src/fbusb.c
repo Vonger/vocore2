@@ -110,17 +110,23 @@ static struct fb_ops fbusb_ops = {
 	.fb_imageblit	= fbusb_imageblit,
 };
 
-static void fbusb_update_frame(struct fbusb_info *uinfo)
+static int fbusb_update_frame(struct fbusb_info *uinfo)
 {
 	struct fb_info *info = uinfo->info;
 	struct fbusb_par *par = info->par;
 	struct usb_device *udev = par->udev;
+	int ret;
 
 	/* 0x40 USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE */
-	usb_control_msg(udev, usb_sndctrlpipe(udev, 0), 0xb0, 0x40,
+	ret = usb_control_msg(udev, usb_sndctrlpipe(udev, 0), 0xb0, 0x40,
 			0, 0, par->cmd, sizeof(par->cmd), FBUSB_MAX_DELAY);
-	usb_bulk_msg(udev, usb_sndbulkpipe(udev, 0x02), info->screen_buffer,
+	if (ret < 0)
+		return ret;
+	ret = usb_bulk_msg(udev, usb_sndbulkpipe(udev, 0x02), info->screen_buffer,
 		     par->screen_size, NULL, FBUSB_MAX_DELAY);
+	if (ret < 0)
+		return ret;
+	return 0;
 }
 
 int fbusb_install_firmware(struct fbusb_info *uinfo)
@@ -190,8 +196,10 @@ static int fbusb_refresh_thread(void *data)
 
 	while (!kthread_should_stop()) {
 		if (!uinfo->pause) {
-			fbusb_update_frame(uinfo);
-			fbusb_update_backlight(uinfo);
+			if (fbusb_update_frame(uinfo) < 0) 
+				uinfo->pause = 1;
+			if (fbusb_update_backlight(uinfo) < 0) 
+				uinfo->pause = 1;
 		} else {
 			ssleep(1);
 		}
