@@ -414,8 +414,10 @@ static void fbusb_disconnect(struct usb_interface *interface)
 	framebuffer_release(info);
 	kfree(uinfo);
 
+	device_remove_file(&interface->dev, &dev_attr_pause);
 	device_remove_file(&interface->dev, &dev_attr_frame_count);
 	device_remove_file(&interface->dev, &dev_attr_backlight);
+	device_remove_file(&interface->dev, &dev_attr_type);
 
 	dev_info(&interface->dev, "device now disconnected.\n");
 }
