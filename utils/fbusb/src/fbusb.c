@@ -18,6 +18,8 @@
 #include <linux/usb.h>
 #include <linux/fb.h>
 #include <linux/mm.h>
+#include <linux/notifier.h>
+#include <linux/reboot.h>
 
 #define FBUSB_WIDTH		480
 #define FBUSB_HEIGHT		800
@@ -62,6 +64,8 @@ struct fbusb_info {
 	u8  pause;
 };
 
+static struct fbusb_info *cur_uinfo;
+
 #include "fbusb_mpucore.h"
 #include "fbusb_common.c"
 
@@ -77,7 +81,7 @@ struct fbusb_info {
 #endif
 
 static int fbusb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
-			      u_int transp, struct fb_info *info)
+				  u_int transp, struct fb_info *info)
 {
 	u32 *pal = info->pseudo_palette;
 	u32 cr = red >> (16 - info->var.red.length);
@@ -100,10 +104,27 @@ static int fbusb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
 	return 0;
 }
 
+static int fbusb_reboot_callback(struct notifier_block *self,
+				  unsigned long val, void *data)
+{
+	if (val == SYS_RESTART) {
+		if (cur_uinfo) {
+			cur_uinfo->pause = 1;
+			msleep(100);
+		}
+	}
+
+	return NOTIFY_DONE;
+}
+
+static struct notifier_block fbusb_reboot_notifier = {
+	.notifier_call = fbusb_reboot_callback,
+};
+
 static struct fb_ops fbusb_ops = {
 	.owner		= THIS_MODULE,
-	.fb_read        = fbusb_read,
-	.fb_write       = fbusb_write,
+	.fb_read	= fbusb_read,
+	.fb_write	= fbusb_write,
 	.fb_setcolreg	= fbusb_setcolreg,
 	.fb_fillrect	= fbusb_fillrect,
 	.fb_copyarea	= fbusb_copyarea,
@@ -123,7 +144,7 @@ static int fbusb_update_frame(struct fbusb_info *uinfo)
 	if (ret < 0)
 		return ret;
 	ret = usb_bulk_msg(udev, usb_sndbulkpipe(udev, 0x02), info->screen_buffer,
-		     par->screen_size, NULL, FBUSB_MAX_DELAY);
+			 par->screen_size, NULL, FBUSB_MAX_DELAY);
 	if (ret < 0)
 		return ret;
 	return 0;
@@ -146,7 +167,7 @@ int fbusb_install_firmware(struct fbusb_info *uinfo)
 
 	buf[0] = 0x01;
 	ret = usb_control_msg(udev, usb_sndctrlpipe(udev, 0), 0xa0, 0x40,
-			      0xe600, 0x00, buf, 1, FBUSB_MAX_DELAY);
+				  0xe600, 0x00, buf, 1, FBUSB_MAX_DELAY);
 	if (ret < 0)
 		goto fbusb_install_firmware_error;
 
@@ -177,7 +198,7 @@ int fbusb_install_firmware(struct fbusb_info *uinfo)
 	/* run 8051 */
 	buf[0] = 0x00;
 	ret = usb_control_msg(udev, usb_sndctrlpipe(udev, 0), 0xa0, 0x40,
-			      0xe600, 0x00, buf, 1, FBUSB_MAX_DELAY);
+				  0xe600, 0x00, buf, 1, FBUSB_MAX_DELAY);
 
 fbusb_install_firmware_error:
 	kfree(ram);
@@ -196,9 +217,9 @@ static int fbusb_refresh_thread(void *data)
 
 	while (!kthread_should_stop()) {
 		if (!uinfo->pause) {
-			if (fbusb_update_frame(uinfo) < 0) 
+			if (fbusb_update_frame(uinfo) < 0)
 				uinfo->pause = 1;
-			if (fbusb_update_backlight(uinfo) < 0) 
+			if (fbusb_update_backlight(uinfo) < 0)
 				uinfo->pause = 1;
 		} else {
 			ssleep(1);
@@ -274,7 +295,7 @@ static ssize_t fbusb_type_store(struct device *dev,
 static DEVICE_ATTR(type, 0660, fbusb_type_show, fbusb_type_store);
 
 static int fbusb_probe(struct usb_interface *interface,
-		       const struct usb_device_id *id)
+			   const struct usb_device_id *id)
 {
 	struct fbusb_info *uinfo = NULL;
 	struct fb_info *info = NULL;
@@ -385,6 +406,9 @@ static int fbusb_probe(struct usb_interface *interface,
 	device_create_file(&interface->dev, &dev_attr_backlight);
 	device_create_file(&interface->dev, &dev_attr_type);
 
+	register_reboot_notifier(&fbusb_reboot_notifier);
+	cur_uinfo = uinfo;
+
 	dev_info(&interface->dev, "fb%d: mode=%dx%dx%d.\n", info->node,
 		 info->var.xres, info->var.yres, info->var.bits_per_pixel);
 	return 0;
@@ -418,6 +442,8 @@ static void fbusb_disconnect(struct usb_interface *interface)
 	device_remove_file(&interface->dev, &dev_attr_frame_count);
 	device_remove_file(&interface->dev, &dev_attr_backlight);
 	device_remove_file(&interface->dev, &dev_attr_type);
+
+	unregister_reboot_notifier(&fbusb_reboot_notifier);
 
 	dev_info(&interface->dev, "device now disconnected.\n");
 }
