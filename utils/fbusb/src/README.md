@@ -7,3 +7,14 @@ nt35510 is for new version screen(back mark is 'djn1522', it is little endina wh
 
 because framebuffer only support 16bit or 32bit color, so it is very slow to convert data from 32bit to 24bit or from 16bit to 24bit, new version solve this problem.
 If you want better colors, need to use libusb send data to the screen, and make it in R-G-B-R-G-B... order. R,G,B each takes one byte.
+
+# Bin File
+
+- fbusb.vocore2.ko is for the screen back marked 'VoCore'
+- fbusb.djn1522.ko is for the screen back marked 'djn1522'
+
+The two screens are using different driver chip, so we need to seprated the driver.
+
+# Copyright
+
+fbusb driver belongs to Vonger Elec & Tech Co.Ltd, DO NOT allowed for commercial usage.
