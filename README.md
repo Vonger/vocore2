@@ -1,12 +1,10 @@
 # Welcome
 
-This feed enable using MTK/Ralink official wifi driver for the latest linux kernel 4.14/openwrt. It should be much stable than current mt76 driver. I patch it for my production VoCore2.
+This feed enable using MTK/Ralink official wifi driver for the latest linux kernel 4.14/openwrt. It should be much stable than current mt76 driver. I patch it for my production VoCore2, but the package should be able to port to other MT76x8 based platform too.
 
-Feel free to submit patch and bug or email me at support@vocore.io
+Feel free to submit patch and bug or email me at support@vocore.io 
 
-This patch is only for study/personal usage, and only for VoCore2, it might burn your house, launch nuke, kill a baby... use it carefully and risk is on you. 
-
-For detailed tutorial, please check vonger.cn, Beginner Tutorial.
+For detailed tutorial, please check vonger.cn, Beginner Tutorial. If you are new to VoCore2, please follow the steps exactly to avoid any mysterious issue :)
 
 
 # How to compile it
