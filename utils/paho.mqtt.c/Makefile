@@ -31,7 +31,7 @@ endef
 
 define Package/paho.mqtt.c/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/output/*.so $(1)/usr/lib/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/output/*s.so.* $(1)/usr/lib/
 endef
 
 
