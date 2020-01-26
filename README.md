@@ -70,4 +70,5 @@ We can debug and develop based on Qt creator(or Eclipse if you like Java)
 # Beginner Tutorial
 
 Setup VM and Compile OpenWrt: https://www.youtube.com/watch?v=ocl6yFtKSNs
+
 Another Setup and Compile: http://vonger.cn/?s=Beginner
