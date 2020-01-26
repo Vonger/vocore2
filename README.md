@@ -67,3 +67,8 @@ cp ./package/vocore2/es8388/openwrt/0045-*.patch ./target/linux/ramips/patches-4
 We can debug and develop based on Qt creator(or Eclipse if you like Java)
 [Tutorial Link Here]http://vonger.cn/?p=14657
 
+# Beginner Tutorial
+
+Setup VM and Compile OpenWrt: https://www.youtube.com/watch?v=ocl6yFtKSNs
+
+Another Setup and Compile: http://vonger.cn/?s=Beginner
