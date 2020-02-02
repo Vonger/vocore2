@@ -51,15 +51,21 @@ cp ./package/vocore2/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/p
 
   ```sh
 cd path/to/openwrt
-patch -p1 < ./package/vocore2/es8388/openwrt/000-*.patch
-cp ./package/vocore2/es8388/openwrt/810-*.patch ./target/linux/ramips/patches-4.14
-cp ./package/vocore2/es8388/openwrt/0045-*.patch ./target/linux/ramips/patches-4.14
+patch -p1 < ./package/vocore2/es8388/*.patch
+cp ./package/vocore2/openwrt/810-*.patch ./target/linux/ramips/patches-4.14
+cp ./package/vocore2/openwrt/0045-*.patch ./target/linux/ramips/patches-4.14
   ```
   
   - Kernel modules -> Sound Support -> select kmod-sound-core and kmod-sound-mt7628
   - Kernel modules -> I2C support -> select kmod-i2c-mt7628
 
-5. compile and enjoy!
+5. for touch screen and spi new feature, require apply all patches.
+
+  ```sh
+cp ./package/vocore2/*.patch ./target/linux/ramips/patches-4.14
+  ```
+
+6. compile and enjoy!
 
 
 # Setup develop enviroment(based on Qt creator)
