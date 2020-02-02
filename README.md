@@ -65,7 +65,13 @@ cp ./package/vocore2/openwrt/0045-*.patch ./target/linux/ramips/patches-4.14
 cp ./package/vocore2/openwrt/*.patch ./target/linux/ramips/patches-4.14
   ```
 
-6. compile and enjoy!
+6. copy config-4.14 to openwrt kernel config folder to avoid missing any kernel module.
+
+  ```sh
+cp ./package/vocore2/config-4.14 ./target/linux/ramips/mt76x8/
+  ```
+
+7. compile and enjoy!
 
 
 # Setup develop enviroment(based on Qt creator)
