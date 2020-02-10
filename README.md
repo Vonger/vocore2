@@ -16,8 +16,8 @@ Please use Linux, MacOS or other Unix compatible system to compile it, the file 
 
   ```sh
 git clone https://github.com/openwrt/openwrt.git
+cd openwrt
 git checkout v18.06.5
-cd path/to/openwrt
 ./scripts/feeds update luci
 ./scripts/feeds install -a -p luci
 cd ./package
@@ -62,17 +62,23 @@ cp ./package/vocore2/openwrt/0045-*.patch ./target/linux/ramips/patches-4.14
 5. for touch screen and spi new feature, require apply all patches.
 
   ```sh
+cd path/to/openwrt
 cp ./package/vocore2/openwrt/*.patch ./target/linux/ramips/patches-4.14
   ```
 
 6. copy config-4.14 to openwrt kernel config folder to avoid missing any kernel module.
 
   ```sh
+cd path/to/openwrt
 cp ./package/vocore2/config-4.14 ./target/linux/ramips/mt76x8/
   ```
 
 7. compile and enjoy!
 
+  ```sh
+cd path/to/openwrt
+make
+  ```
 
 # Setup develop enviroment(based on Qt creator)
 
