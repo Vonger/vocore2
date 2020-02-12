@@ -61,9 +61,19 @@ cp ./package/vocore2/openwrt/0045-*.patch ./target/linux/ramips/patches-4.14
 
 5. for touch screen and spi new feature, require apply all patches.
 
+ - support touch screen.
+
   ```sh
 cd path/to/openwrt
-cp ./package/vocore2/openwrt/*.patch ./target/linux/ramips/patches-4.14
+cp ./package/vocore2/openwrt/814-*.patch ./target/linux/ramips/patches-4.14
+  ```
+
+ - support spi full duplex and gpio cs for more spi devices.
+
+  ```sh
+cd path/to/openwrt
+cp ./package/vocore2/openwrt/0043-*.patch ./target/linux/ramips/patches-4.14
+cp ./package/vocore2/openwrt/811-*.patch ./target/linux/ramips/patches-4.14
   ```
 
 6. copy config-4.14 to openwrt kernel config folder to avoid missing any kernel module.
