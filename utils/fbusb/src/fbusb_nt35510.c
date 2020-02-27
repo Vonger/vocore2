@@ -195,7 +195,6 @@ fbusb_boot_setup_error:
 static int fbusb_update_backlight(struct fbusb_info *uinfo)
 {
 	static u16 backlight;
-	struct fbusb_par *par = uinfo->info->par;
 	u8 *cmd;
 	int ret;
 
@@ -207,7 +206,7 @@ static int fbusb_update_backlight(struct fbusb_info *uinfo)
 	cmd[1] = 0x51;
 	cmd[2] = 0x02;
 	cmd[6] = (backlight * 255 + 50) / 100;
-	ret = usb_control_msg(par->udev, usb_sndctrlpipe(par->udev, 0), 0xb0, 0x40,
+	ret = usb_control_msg(uinfo->udev, usb_sndctrlpipe(uinfo->udev, 0), 0xb0, 0x40,
 		0, 0, cmd, 8, FBUSB_MAX_DELAY);
 	kfree(cmd);
 

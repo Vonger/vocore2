@@ -20,6 +20,8 @@
 #include <linux/mm.h>
 #include <linux/notifier.h>
 #include <linux/reboot.h>
+#include <linux/input.h>
+#include <linux/usb/input.h>
 
 #define FBUSB_WIDTH		480
 #define FBUSB_HEIGHT		800
@@ -48,7 +50,6 @@ static const struct fb_var_screeninfo fbusb_var = {
 
 struct fbusb_par {
 	struct fb_info *info;
-	struct usb_device *udev;
 	char cmd[6];
 	u32 palette[FBUSB_PALETTE_SIZE];
 	int screen_size;	/* real used size, not aligned page */
@@ -58,10 +59,20 @@ struct fbusb_info {
 	struct fb_info *info;
 	struct task_struct *task;
 	struct usb_interface *interface;
+	struct usb_device *udev;
 	u16 id_product;
 	u16 backlight;
 	u32 frame_count;
 	u8  pause;
+
+	/* touch screen parameters */
+	struct input_dev *input;
+	char phys[64];
+	struct urb *irq;
+	unsigned char *data;
+	dma_addr_t dma;
+	int data_size;
+	int touch_swapxy, touch_mirror;
 };
 
 static struct fbusb_info *cur_uinfo;
@@ -135,7 +146,7 @@ static int fbusb_update_frame(struct fbusb_info *uinfo)
 {
 	struct fb_info *info = uinfo->info;
 	struct fbusb_par *par = info->par;
-	struct usb_device *udev = par->udev;
+	struct usb_device *udev = uinfo->udev;
 	int ret;
 
 	/* 0x40 USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE */
@@ -231,6 +242,89 @@ static int fbusb_refresh_thread(void *data)
 	return 0;
 }
 
+union axis{
+    struct hx{
+	unsigned char h:4;
+	unsigned char u:2;
+	unsigned char f:2;
+    } x;
+
+    struct hy{
+	unsigned char h:4;
+	unsigned char id:4;
+    } y;
+
+    char c;
+};
+
+struct point {
+    union axis xh;
+    unsigned char xl;
+    union axis yh;
+    unsigned char yl;
+
+    unsigned char weight;
+    unsigned char misc;
+};
+
+struct touch {
+    unsigned char unused[2];
+    unsigned char count;
+    struct point p[2];
+};
+
+static void fbusb_touch_irq(struct urb *urb)
+{
+	struct fbusb_info *uinfo = urb->context;
+	struct device *dev = &uinfo->interface->dev;
+	struct touch *t = (struct touch *)uinfo->data;
+	int ret, x, y, k;
+
+	/* urb->status == ENOENT: closed by usb_kill_urb */
+	if (urb->status)
+		return;
+
+	x = (((int)t->p[0].xh.x.h) << 8) + t->p[0].xl;
+	y = (((int)t->p[0].yh.y.h) << 8) + t->p[0].yl;
+	k = (t->p[0].xh.x.f != 1) ? 1 : 0;
+
+	input_report_key(uinfo->input, BTN_TOUCH, k);
+	if (uinfo->touch_swapxy) {
+		input_report_abs(uinfo->input, ABS_X, y);
+		input_report_abs(uinfo->input, ABS_Y, x);
+	} else {
+		input_report_abs(uinfo->input, ABS_X, x);
+		input_report_abs(uinfo->input, ABS_Y, y);
+	}
+	input_sync(uinfo->input);
+	dev_dbg(dev, "touchscreen x=%d, y=%d, key=%d.\n", x, y, k);
+
+	ret = usb_submit_urb(urb, GFP_ATOMIC);
+	if (ret)
+		dev_err(dev, "usb_submit_urb failed at irq: %d\n", ret);
+}
+
+static int fbusb_touch_open(struct input_dev *input)
+{
+	struct fbusb_info *uinfo = input_get_drvdata(input);
+	int ret;
+
+	ret = usb_submit_urb(uinfo->irq, GFP_KERNEL);
+	if (ret) {
+		dev_err(&uinfo->interface->dev,
+			"usb_submit_urb failed at open: %d.\n", ret);
+		return -EIO;
+	}
+
+	return ret;
+}
+
+static void fbusb_touch_close(struct input_dev *input)
+{
+	struct fbusb_info *uinfo = input_get_drvdata(input);
+	usb_kill_urb(uinfo->irq);
+}
+
 static ssize_t fbusb_frame_count_show(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
@@ -294,6 +388,24 @@ static ssize_t fbusb_type_store(struct device *dev,
 
 static DEVICE_ATTR(type, 0660, fbusb_type_show, fbusb_type_store);
 
+static ssize_t fbusb_touch_swapxy_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	struct fbusb_info *uinfo = dev_get_drvdata(dev);
+	return sprintf(buf, "%d\n", uinfo->touch_swapxy);
+}
+
+static ssize_t fbusb_touch_swapxy_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct fbusb_info *uinfo = dev_get_drvdata(dev);
+	if (buf[0] == '0' || buf[0] == '1')
+		uinfo->touch_swapxy = buf[0] - '0';
+	return count;
+}
+
+static DEVICE_ATTR(touch_swapxy, 0660, fbusb_touch_swapxy_show, fbusb_touch_swapxy_store);
+
 static int fbusb_probe(struct usb_interface *interface,
 			   const struct usb_device_id *id)
 {
@@ -341,10 +453,10 @@ static int fbusb_probe(struct usb_interface *interface,
 	}
 	uinfo->info = info;
 	uinfo->backlight = 100;		/* max backlight default */
+	uinfo->udev = usb_get_dev(interface_to_usbdev(interface));
 
 	par = info->par;
 	par->info = info;
-	par->udev = usb_get_dev(interface_to_usbdev(interface));
 	par->screen_size = FBUSB_WIDTH * FBUSB_HEIGHT * FBUSB_BPP / 8;
 
 	/* setup write command for frame, 768000 bytes. */
@@ -405,13 +517,58 @@ static int fbusb_probe(struct usb_interface *interface,
 	device_create_file(&interface->dev, &dev_attr_frame_count);
 	device_create_file(&interface->dev, &dev_attr_backlight);
 	device_create_file(&interface->dev, &dev_attr_type);
+	device_create_file(&interface->dev, &dev_attr_touch_swapxy);
 
 	register_reboot_notifier(&fbusb_reboot_notifier);
 	cur_uinfo = uinfo;
 
+	/* setup usb interrupt device */
+	uinfo->irq = usb_alloc_urb(0, GFP_KERNEL);
+	if (!uinfo->irq) {
+		dev_err(&interface->dev, "unable to alloc usb irq.\n");
+		goto error_fb_release;
+	}
+	uinfo->data_size = 14;	/* touch infomation data length */
+	uinfo->data = usb_alloc_coherent(uinfo->udev, uinfo->data_size,
+					 GFP_KERNEL, &uinfo->dma);
+	usb_fill_int_urb(uinfo->irq, uinfo->udev, usb_rcvintpipe(uinfo->udev, 1),
+		uinfo->data, uinfo->data_size, fbusb_touch_irq, uinfo, 0);
+	uinfo->irq->dev = uinfo->udev;
+	uinfo->irq->transfer_dma = uinfo->dma;
+	uinfo->irq->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
+
+	/* register input device for touch */
+	usb_make_path(uinfo->udev, uinfo->phys, sizeof(uinfo->phys));
+	strlcat(uinfo->phys, "/input0", sizeof(uinfo->phys));
+
+	uinfo->input = input_allocate_device();
+	usb_to_input_id(uinfo->udev, &uinfo->input->id);
+	uinfo->input->name = "VoCore Touchscreen";
+	uinfo->input->phys = uinfo->phys;
+	uinfo->input->dev.parent = &interface->dev;
+
+	input_set_capability(uinfo->input, EV_KEY, BTN_TOUCH);
+	input_set_abs_params(uinfo->input, ABS_X, 0, info->var.xres, 0, 0);
+	input_set_abs_params(uinfo->input, ABS_Y, 0, info->var.yres, 0, 0);
+
+	uinfo->input->open = fbusb_touch_open;
+	uinfo->input->close = fbusb_touch_close;
+	input_set_drvdata(uinfo->input, uinfo);
+
+	ret = input_register_device(uinfo->input);
+	if (ret) {
+		dev_err(&interface->dev, "unable to regist touchscreen device.\n");
+		goto error_free_urb;
+	}
+
 	dev_info(&interface->dev, "fb%d: mode=%dx%dx%d.\n", info->node,
 		 info->var.xres, info->var.yres, info->var.bits_per_pixel);
+
 	return 0;
+
+error_free_urb:
+	usb_free_urb(uinfo->irq);
+	usb_free_coherent(uinfo->udev, uinfo->data_size, uinfo->data, uinfo->dma);
 
 error_fb_release:
 	framebuffer_release(info);
@@ -433,6 +590,10 @@ static void fbusb_disconnect(struct usb_interface *interface)
 	if (uinfo->task)
 		kthread_stop(uinfo->task);
 
+	input_unregister_device(uinfo->input);
+	usb_free_urb(uinfo->irq);
+	usb_free_coherent(uinfo->udev, uinfo->data_size, uinfo->data, uinfo->dma);
+
 	unregister_framebuffer(info);
 	kfree(info->screen_buffer);
 	framebuffer_release(info);
@@ -442,6 +603,7 @@ static void fbusb_disconnect(struct usb_interface *interface)
 	device_remove_file(&interface->dev, &dev_attr_frame_count);
 	device_remove_file(&interface->dev, &dev_attr_backlight);
 	device_remove_file(&interface->dev, &dev_attr_type);
+	device_remove_file(&interface->dev, &dev_attr_touch_swapxy);
 
 	unregister_reboot_notifier(&fbusb_reboot_notifier);
 
