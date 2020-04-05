@@ -335,8 +335,7 @@ $(call Package/libffmpeg/Default)
  DEPENDS+= @!ALL \
            +FFMPEG_CUSTOM_SELECT_libopus:libopus \
            +PACKAGE_libx264:libx264 +PACKAGE_lame-lib:lame-lib \
-           +FFMPEG_CUSTOM_SELECT_libshine:shine \
-           +PACKAGE_fdk-aac:fdk-aac
+           +FFMPEG_CUSTOM_SELECT_libshine:shine
  VARIANT:=custom
  MENU:=1
 endef
@@ -496,13 +495,15 @@ ifeq ($(BUILD_VARIANT),full)
 
 	FFMPEG_CONFIGURE+= \
 		--enable-avresample \
-		$(if $(CONFIG_BUILD_PATENTED),, \
-			$(call FFMPEG_DISABLE,decoder,$(FFMPEG_PATENTED_DECODERS)) \
-			$(call FFMPEG_DISABLE,encoder,$(FFMPEG_PATENTED_ENCODERS)) \
-			$(call FFMPEG_DISABLE,muxer,$(FFMPEG_PATENTED_MUXERS)) \
-			$(call FFMPEG_DISABLE,demuxer,$(FFMPEG_PATENTED_DEMUXERS)) \
-			$(call FFMPEG_DISABLE,parser,$(FFMPEG_PATENTED_PARSERS))) \
-		$(if $(CONFIG_PACKAGE_libopus),--enable-libopus)
+        $(if $(CONFIG_PACKAGE_libopus),--enable-libopus)
+
+#		$(if $(CONFIG_BUILD_PATENTED),, \
+#			$(call FFMPEG_DISABLE,decoder,$(FFMPEG_PATENTED_DECODERS)) \
+#			$(call FFMPEG_DISABLE,encoder,$(FFMPEG_PATENTED_ENCODERS)) \
+#			$(call FFMPEG_DISABLE,muxer,$(FFMPEG_PATENTED_MUXERS)) \
+#			$(call FFMPEG_DISABLE,demuxer,$(FFMPEG_PATENTED_DEMUXERS)) \
+#			$(call FFMPEG_DISABLE,parser,$(FFMPEG_PATENTED_PARSERS))) \
+#		$(if $(CONFIG_PACKAGE_libopus),--enable-libopus)
   ifeq ($(CONFIG_SOFT_FLOAT),y)
 	FFMPEG_CONFIGURE+= \
 		--enable-small \
