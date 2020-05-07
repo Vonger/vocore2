@@ -10,8 +10,5 @@
 811-spi-gpio-chip-select.patch
 (optional)support more than two SPI device, CS pins function from GPIO, depends on patch 0043.
 
-814-vocore-touch-support.patch
-(optional)support touch screen for VoCore Screen, depends on hardware.
-
 815-sdcard-pinmux-i2si2c.patch
 (optional)pinmux SDXC interface from ethernet port 3,4 to I2C/I2S, detail please check vocore.io/v2.html, pins map.
