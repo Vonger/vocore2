@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=fbusb
-PKG_VERSION:=v3
+PKG_VERSION:=v4
 PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
@@ -13,7 +13,7 @@ define KernelPackage/fbusb
   SECTION:=vocore2
   CATEGORY:=VoCore2
   AUTOLOAD:=$(call AutoLoad,01,fbusb)
-  DEPENDS:=+kmod-usb-core
+  DEPENDS:=+kmod-usb-core +kmod-usb-hid
 endef
 
 define KernelPackage/fbusb/description
