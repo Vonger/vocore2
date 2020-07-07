@@ -176,6 +176,9 @@ static int fbusb_refresh_thread(void *data)
         // send sleep out to screen, quit sleep mode.
         uinfo->cmd[0] = 0x00;
         uinfo->cmd[1] = 0x29;
+	uinfo->cmd[2] = 0x00;
+	uinfo->cmd[3] = 0x00;
+	uinfo->cmd_len = 4;
         fbusb_send_command(uinfo);
         
         while (!kthread_should_stop()) {
