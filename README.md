@@ -12,6 +12,8 @@ For detailed tutorial, please check vonger.cn, Beginner Tutorial. If you are new
 Please follow my steps in order to avoid issue. "path/to/" is your openwrt location.
 Please use Linux, MacOS or other Unix compatible system to compile it, the file system must be case sensitive. 
 
+## For OpenWrt 18.06.5 
+
 1. add the code to your openwrt source(support openwrt 18.06.5).
 
   ```sh
@@ -28,16 +30,16 @@ git clone https://github.com/vonger/vocore2.git
 
   ```sh
 cd path/to/openwrt
-patch -p1 < ./package/vocore2/mt7628/openwrt/000-*.patch
-patch -p1 < ./package/vocore2/mt7628/openwrt/luci/*.patch
+patch -p1 < ./package/vocore2/openwrt.18065/mt7628/openwrt/000-*.patch
+patch -p1 < ./package/vocore2/openwrt.18065/mt7628/openwrt/luci/*.patch
 mkdir ./package/network/utils/iwinfo/patches
-cp ./package/vocore2/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/patches
+cp ./package/vocore2/openwrt.18065/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/patches
   ```
   
   note: patch for iwinfo might broken wifi driver based on 802.11(such as USB WiFi), but it is necessary to make mt7628 works with uci system. In futher, I consider to add patch to make mt7628 driver support 802.11.
 
 
-3. you can direct `cp ./package/vocore2/.config ./` ***OR*** configure mt7628 in `make menuconfig`
+3. you can direct `cp ./package/vocore2/openwrt.18065/.config ./` ***OR*** configure mt7628 in `make menuconfig`
 
   - Target System: MediaTek Ralink MIPS
   - Subtarget: MT76x8 based boards
@@ -59,28 +61,19 @@ cp ./package/vocore2/openwrt/0045-*.patch ./target/linux/ramips/patches-4.14
   - Kernel modules -> Sound Support -> select kmod-sound-core and kmod-sound-mt7628
   - Kernel modules -> I2C support -> select kmod-i2c-mt7628
 
-5. for touch screen and spi new feature, require apply all patches.
-
- - support touch screen.
+5. (optional)support spi full duplex and gpio cs for more spi devices.
 
   ```sh
 cd path/to/openwrt
-cp ./package/vocore2/openwrt/814-*.patch ./target/linux/ramips/patches-4.14
-  ```
-
- - support spi full duplex and gpio cs for more spi devices.
-
-  ```sh
-cd path/to/openwrt
-cp ./package/vocore2/openwrt/0043-*.patch ./target/linux/ramips/patches-4.14
-cp ./package/vocore2/openwrt/811-*.patch ./target/linux/ramips/patches-4.14
+cp ./package/vocore2/openwrt/0043-spi-add-mt7621-support.patch ./target/linux/ramips/patches-4.14
+cp ./package/vocore2/openwrt/811-spi-gpio-chip-select.patch ./target/linux/ramips/patches-4.14
   ```
 
 6. copy config-4.14 to openwrt kernel config folder to avoid missing any kernel module.
 
   ```sh
 cd path/to/openwrt
-cp ./package/vocore2/config-4.14 ./target/linux/ramips/mt76x8/
+cp ./package/vocore2/openwrt.18065/config-4.14 ./target/linux/ramips/mt76x8/
   ```
 
 7. compile and enjoy!
