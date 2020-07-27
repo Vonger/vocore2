@@ -30,16 +30,16 @@ git clone https://github.com/vonger/vocore2.git
 
   ```sh
 cd path/to/openwrt
-patch -p1 < ./package/vocore2/openwrt.18065/mt7628/openwrt/000-*.patch
-patch -p1 < ./package/vocore2/openwrt.18065/mt7628/openwrt/luci/*.patch
+patch -p1 < ./package/vocore2/openwrt.1806/mt7628/openwrt/000-*.patch
+patch -p1 < ./package/vocore2/openwrt.1806/mt7628/openwrt/luci/*.patch
 mkdir ./package/network/utils/iwinfo/patches
-cp ./package/vocore2/openwrt.18065/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/patches
+cp ./package/vocore2/openwrt.1806/mt7628/openwrt/080-*.patch ./package/network/utils/iwinfo/patches
   ```
   
   note: patch for iwinfo might broken wifi driver based on 802.11(such as USB WiFi), but it is necessary to make mt7628 works with uci system. In futher, I consider to add patch to make mt7628 driver support 802.11.
 
 
-3. you can direct `cp ./package/vocore2/openwrt.18065/.config ./` ***OR*** configure mt7628 in `make menuconfig`
+3. you can direct `cp ./package/vocore2/openwrt.1806/.config ./` ***OR*** configure mt7628 in `make menuconfig`
 
   - Target System: MediaTek Ralink MIPS
   - Subtarget: MT76x8 based boards
@@ -73,7 +73,7 @@ cp ./package/vocore2/openwrt/811-spi-gpio-chip-select.patch ./target/linux/ramip
 
   ```sh
 cd path/to/openwrt
-cp ./package/vocore2/openwrt.18065/config-4.14 ./target/linux/ramips/mt76x8/
+cp ./package/vocore2/openwrt.1806/config-4.14 ./target/linux/ramips/mt76x8/
   ```
 
 7. compile and enjoy!
