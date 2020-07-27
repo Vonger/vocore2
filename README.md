@@ -17,8 +17,10 @@ Please use Linux, MacOS or other Unix compatible system to compile it, the file 
 1. apply patch for mt76 to support switch between 1T1R and 2T2R.
 
   ```sh
-cp ./package/vocore2/openwrt.1907/0822-mt76-read-factory-setting.patch ./package/network/utils/iwinfo/patches
+mkdir ./package/kernel/mt76/patches
+cp ./package/vocore2/openwrt.1907/0822-mt76-read-factory-setting.patch ./package/kernel/mt76/patches
   ``` 
+note: submit to https://github.com/openwrt/mt76/pull/426, once merge this can be removed.
 
 ## For OpenWrt 18.06 
 
