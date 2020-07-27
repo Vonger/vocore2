@@ -12,7 +12,15 @@ For detailed tutorial, please check vonger.cn, Beginner Tutorial. If you are new
 Please follow my steps in order to avoid issue. "path/to/" is your openwrt location.
 Please use Linux, MacOS or other Unix compatible system to compile it, the file system must be case sensitive. 
 
-## For OpenWrt 18.06.5 
+## For OpenWrt 19.07
+
+1. apply patch for mt76 to support switch between 1T1R and 2T2R.
+
+  ```sh
+cp ./package/vocore2/openwrt.1907/0822-mt76-read-factory-setting.patch ./package/network/utils/iwinfo/patches
+  ``` 
+
+## For OpenWrt 18.06 
 
 1. add the code to your openwrt source(support openwrt 18.06.5).
 
