@@ -76,20 +76,20 @@ cp ./package/vocore2/openwrt.1806/mt7628/openwrt/080-*.patch ./package/network/u
 
   ```sh
 cd path/to/openwrt
-patch -p1 < ./package/vocore2/es8388/*.patch
-cp ./package/vocore2/openwrt/810-*.patch ./target/linux/ramips/patches-4.14
-cp ./package/vocore2/openwrt/0045-*.patch ./target/linux/ramips/patches-4.14
+patch -p1 < ./package/vocore2/openwrt.1806/es8388/*.patch
+cp ./package/vocore2/openwrt.1806/810-*.patch ./target/linux/ramips/patches-4.14
+cp ./package/vocore2/openwrt.1806/0045-*.patch ./target/linux/ramips/patches-4.14
   ```
   
   - Kernel modules -> Sound Support -> select kmod-sound-core and kmod-sound-mt7628
   - Kernel modules -> I2C support -> select kmod-i2c-mt7628
 
-4. (optional)support spi full duplex and gpio cs for more spi devices.
+4. (optional)support spi full duplex(gpio-bitbang) and/or gpio cs for more spi devices.
 
   ```sh
 cd path/to/openwrt
-cp ./package/vocore2/openwrt/0043-spi-add-mt7621-support.patch ./target/linux/ramips/patches-4.14
-cp ./package/vocore2/openwrt/811-spi-gpio-chip-select.patch ./target/linux/ramips/patches-4.14
+cp ./package/vocore2/openwrt.1806/0043-spi-add-mt7621-support.patch ./target/linux/ramips/patches-4.14
+cp ./package/vocore2/openwrt.1806/811-spi-gpio-chip-select.patch ./target/linux/ramips/patches-4.14
   ```
 
 5. copy config-4.14 to openwrt kernel config folder to avoid missing any kernel module.
