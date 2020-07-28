@@ -89,6 +89,7 @@
 +};
 +
 +&i2c {
++	compatible = "mediatek,i2c-mt7628";
 +	status = "okay";
 +
 +	codec: es8388@10 {
