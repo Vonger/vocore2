@@ -18,8 +18,8 @@ Please use Linux, MacOS or other Unix compatible system to compile it, the file 
 git clone https://github.com/openwrt/openwrt.git
 cd openwrt
 git checkout v18.06.5 ...(or v19.07.3)
-./scripts/feeds update luci
-./scripts/feeds install -a -p luci
+./scripts/feeds update -a
+./scripts/feeds install -a 
 cd ./package
 git clone https://github.com/vonger/vocore2.git
 ```
