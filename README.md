@@ -47,6 +47,8 @@ note: patch has submitted to https://github.com/openwrt/mt76/pull/426, once merg
   - cp ./package/vocore2/openwrt.1907/0810-es8388-support.patch ./target/linux/ramips/patches-4.14
   - cp ./package/vocore2/openwrt.1907/0882-pinctrl-fix-gpio-name.patch ./target/linux/ramips/patches-4.14
 
+note: current driver will broken the system after play sound around 2 minutes. I think it should be i2s driver issue, working on fix this.
+
 ## For OpenWrt 18.06 
 
 1. patch your openwrt with necessary patches to use this driver.

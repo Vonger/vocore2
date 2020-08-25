@@ -56,7 +56,7 @@
  
 --- a/target/linux/ramips/dts/VOCORE2.dts
 +++ b/target/linux/ramips/dts/VOCORE2.dts
-@@ -16,6 +16,45 @@
+@@ -23,6 +23,45 @@
  			gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
  		};
  	};
@@ -89,7 +89,6 @@
 +};
 +
 +&i2c {
-+	compatible = "mediatek,i2c-mt7628";
 +	status = "okay";
 +
 +	codec: es8388@10 {
