@@ -194,13 +194,13 @@
 +	snd_soc_write(codec, ES8328_ADCCONTROL5, 0x20);
 +	snd_soc_write(codec, ES8328_DACCONTROL2, 0x20);
 +
-+	/* set sound play volumn to max for easy use. */
++	/* set sound play volumn to mid for easy use. */
 +	snd_soc_write(codec, ES8328_DACCONTROL17, 0x80);
 +	snd_soc_write(codec, ES8328_DACCONTROL20, 0x80);
 +	snd_soc_write(codec, ES8328_DACCONTROL4, 0x00);
 +	snd_soc_write(codec, ES8328_DACCONTROL5, 0x00);
-+	snd_soc_write(codec, ES8328_LOUT1VOL, 0x1e);
-+	snd_soc_write(codec, ES8328_ROUT1VOL, 0x1e);
++	snd_soc_write(codec, ES8328_LOUT1VOL, 0x10);
++	snd_soc_write(codec, ES8328_ROUT1VOL, 0x10);
 +
 +	/* set sound record volumn to max for easy use. */
 +	snd_soc_write(codec, ES8328_ADCCONTROL8, 0x00);
