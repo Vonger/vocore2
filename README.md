@@ -47,6 +47,15 @@ note: patch has submitted to https://github.com/openwrt/mt76/pull/426, once merg
   - cp ./package/vocore2/openwrt.1907/0810-es8388-support.patch ./target/linux/ramips/patches-4.14
   - cp ./package/vocore2/openwrt.1907/0882-pinctrl-fix-gpio-name.patch ./target/linux/ramips/patches-4.14
 
+4. enable sd card.
+  - patch -p1 < ./package/vocore2/openwrt.1907/vocore2-default-enable-sdcard.patch
+
+5. use default config setting.
+  - cd path/to/openwrt
+  - cp ./package/vocore2/openwrt.1907/config-4.14 ./target/linux/ramips/mt76x8/
+
+Then ready to compile.
+
 
 ## For OpenWrt 18.06 
 
