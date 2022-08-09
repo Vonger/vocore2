@@ -13,7 +13,7 @@ define KernelPackage/fbusb
   SECTION:=vocore2
   CATEGORY:=VoCore2
   AUTOLOAD:=$(call AutoLoad,01,fbusb)
-  DEPENDS:=+kmod-usb-core +kmod-usb-hid
+  DEPENDS:=+kmod-usb-core +kmod-usb-hid +kmod-fb
 endef
 
 define KernelPackage/fbusb/description
