@@ -68,3 +68,19 @@ to save file
 3. reboot raspberrypi board
 
 4. the graphic will display on vocore screen by default (test on rpi4)
+
+## note
+
+some screen is small, like your old android 2.3 phone
+
+you may be need tune the ui, like android app
+
+eg: button need big size easy to tap
+
+there is some suggest project:
+
+* https://plasma-mobile.org/
+
+* https://sxmo.org/
+
+* XFCE4
