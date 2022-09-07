@@ -784,11 +784,12 @@ endef
 Package/libffmpeg-audio-dec/install = $(Package/libffmpeg-custom/install)
 
 $(eval $(call BuildPackage,ffmpeg))
-$(eval $(call BuildPackage,ffprobe))
-$(eval $(call BuildPackage,ffserver))
+# ffserver is borken, fix later
+#$(eval $(call BuildPackage,ffprobe))
+#$(eval $(call BuildPackage,ffserver))
 $(eval $(call BuildPackage,ffmpeg-custom))
-$(eval $(call BuildPackage,ffprobe-custom))
-$(eval $(call BuildPackage,ffserver-custom))
+#$(eval $(call BuildPackage,ffprobe-custom))
+#$(eval $(call BuildPackage,ffserver-custom))
 $(eval $(call BuildPackage,libffmpeg-audio-dec))
 $(eval $(call BuildPackage,libffmpeg-full))
 $(eval $(call BuildPackage,libffmpeg-mini))
