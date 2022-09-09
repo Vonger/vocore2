@@ -336,6 +336,13 @@ config FFMPEG_CUSTOM_MUXER_ogg
 config FFMPEG_CUSTOM_MUXER_rtp
 	bool "RTP"
 
+config FFMPEG_CUSTOM_MUXER_rtsp
+	bool "rtsp"
+	select FFMPEG_CUSTOM_MUXER_rtp
+
+config FFMPEG_CUSTOM_MUXER_segment
+	bool "segment"
+
 comment "Demuxers"
 
 config FFMPEG_CUSTOM_DEMUXER_aac

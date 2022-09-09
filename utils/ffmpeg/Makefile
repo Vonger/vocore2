@@ -74,6 +74,8 @@ FFMPEG_CUSTOM_MUXERS:= \
 	mpegts \
 	ogg \
 	rtp \
+	rtsp \
+	segment \
 
 FFMPEG_CUSTOM_DEMUXERS:= \
 	aac \
