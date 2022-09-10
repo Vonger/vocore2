@@ -30,12 +30,57 @@ sudo cp fbusb.ko /lib/modules/`uname -r`/extra/ # install module
 sudo depmod -a # for autoloading
 ```
 
+## install xorg configuration file
+
+```
+sudo cp /etc/X11/xorg.conf /etc/X11/xorg.conf.bak # backup origin config file
+sudo nano /etc/X11/xorg.conf
+```
+
+please paste:
+
+```
+Section "Device"
+	Identifier      "vocore screen"
+	Driver          "fbturbo"
+	Option          "fbdev" "/dev/fb0"
+
+	Option          "SwapbuffersWait" "true"
+EndSection
+```
+
+Use 
+
+```
+Ctrl+X
+y
+Enter
+```
+
+to save file
+
 ## ready for use
 
 1. plugout hdmi cable
 
-2. reboot raspberrypi board
+2. connect vocore screen
 
-3. connect vocore screen
+3. reboot raspberrypi board
 
 4. the graphic will display on vocore screen by default (test on rpi4)
+
+## note
+
+some screen is small, like your old android 2.3 phone
+
+you may be need tune the ui, like android app
+
+eg: button need big size easy to tap
+
+there is some suggest project:
+
+* https://plasma-mobile.org/
+
+* https://sxmo.org/
+
+* XFCE4

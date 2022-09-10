@@ -9,11 +9,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ffmpeg
-PKG_VERSION:=4.2.2
+PKG_VERSION:=5.1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://ffmpeg.org/releases/
-PKG_MD5SUM:=348956fc2faa57a2f79bbb84ded9fbc3
+PKG_MD5SUM:=efd690ec82772073fd9d3ae83ca615da
 
 PKG_LICENSE:=LGPL-2.1-or-later GPL-2.0-or-later LGPL-3.0-or-later
 PKG_LICENSE_FILES:=COPYING.GPLv2 COPYING.GPLv3 COPYING.LGPLv2.1 COPYING.LGPLv3
@@ -74,6 +74,8 @@ FFMPEG_CUSTOM_MUXERS:= \
 	mpegts \
 	ogg \
 	rtp \
+	rtsp \
+	segment \
 
 FFMPEG_CUSTOM_DEMUXERS:= \
 	aac \
@@ -116,6 +118,10 @@ FFMPEG_CUSTOM_PARSERS:= \
 
 FFMPEG_CUSTOM_PROTOCOLS:= \
 	file http icecast pipe rtp tcp udp
+
+FFMPEG_CUSTOM_INDEVS:= \
+        v4l2
+
 
 FFMPEG_MINI_DECODERS:= \
 	ac3 \
@@ -220,14 +226,15 @@ PKG_CONFIG_DEPENDS:= \
 	$(patsubst %,CONFIG_FFMPEG_CUSTOM_MUXER_%,$(FFMPEG_CUSTOM_MUXERS)) \
 	$(patsubst %,CONFIG_FFMPEG_CUSTOM_DEMUXER_%,$(FFMPEG_CUSTOM_DEMUXERS)) \
 	$(patsubst %,CONFIG_FFMPEG_CUSTOM_PARSER_%,$(FFMPEG_CUSTOM_PARSERS)) \
-	$(patsubst %,CONFIG_FFMPEG_CUSTOM_PROTOCOL_%,$(FFMPEG_CUSTOM_PROTOCOLS))
+	$(patsubst %,CONFIG_FFMPEG_CUSTOM_PROTOCOL_%,$(FFMPEG_CUSTOM_PROTOCOLS)) \
+	$(patsubst %,CONFIG_FFMPEG_CUSTOM_INDEV_%,$(FFMPEG_CUSTOM_INDEVS))
 
 include $(INCLUDE_DIR)/package.mk
 
 define Package/ffmpeg/Default
  TITLE:=FFmpeg
  URL:=https://ffmpeg.org/
- DEPENDS+= +libpthread
+ DEPENDS+= +libpthread +libatomic
 endef
 
 define Package/ffmpeg/Default/description
@@ -494,7 +501,6 @@ ifeq ($(BUILD_VARIANT),full)
 	)
 
 	FFMPEG_CONFIGURE+= \
-		--enable-avresample \
         $(if $(CONFIG_PACKAGE_libopus),--enable-libopus)
 
 #		$(if $(CONFIG_BUILD_PATENTED),, \
@@ -571,6 +577,7 @@ ifeq ($(BUILD_VARIANT),custom)
 	$(call FFMPEG_ENABLE,demuxer,$(FFMPEG_CUSTOM_DEMUXERS),CONFIG_FFMPEG_CUSTOM_DEMUXER) \
 	$(call FFMPEG_ENABLE,parser,$(FFMPEG_CUSTOM_PARSERS),CONFIG_FFMPEG_CUSTOM_PARSER) \
 	$(call FFMPEG_ENABLE,protocol,$(FFMPEG_CUSTOM_PROTOCOLS),CONFIG_FFMPEG_CUSTOM_PROTOCOL) \
+	$(call FFMPEG_ENABLE,indev,$(FFMPEG_CUSTOM_INDEVS),CONFIG_FFMPEG_CUSTOM_INDEV) \
 
 ifeq ($(CONFIG_FFMPEG_CUSTOM_SELECT_adpcm),y)
   FFMPEG_CONFIGURE+= \
@@ -691,9 +698,9 @@ define Build/InstallDev/full
 	$(INSTALL_DIR) $(1)/usr/include
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_INSTALL_DIR)/usr/include/lib{avcodec,avdevice,avfilter,avformat,avresample,avutil,swresample,swscale} $(1)/usr/include/
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{avcodec,avdevice,avfilter,avformat,avresample,avutil,swresample,swscale}.{a,so*} $(1)/usr/lib/
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/lib{avcodec,avdevice,avfilter,avformat,avresample,avutil,swresample,swscale}.pc $(1)/usr/lib/pkgconfig/
+	$(CP) $(PKG_INSTALL_DIR)/usr/include/lib{avcodec,avdevice,avfilter,avformat,avutil,swresample,swscale} $(1)/usr/include/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{avcodec,avdevice,avfilter,avformat,avutil,swresample,swscale}.{a,so*} $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/lib{avcodec,avdevice,avfilter,avformat,avutil,swresample,swscale}.pc $(1)/usr/lib/pkgconfig/
 ifneq ($(CONFIG_PACKAGE_libx264),)
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/libpostproc $(1)/usr/include/
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libpostproc.{a,so*} $(1)/usr/lib/
@@ -771,7 +778,7 @@ endef
 # Only ffmpeg with libx264 is GPL (yes libpostproc); all other builds are lgpl (no libpostproc)
 define Package/libffmpeg-full/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{avcodec,avdevice,avfilter,avformat,avresample,avutil,swresample,swscale}.so.* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{avcodec,avdevice,avfilter,avformat,avutil,swresample,swscale}.so.* $(1)/usr/lib/
 ifneq ($(CONFIG_PACKAGE_libx264),)
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libpostproc.so.* $(1)/usr/lib/
 endif
@@ -785,11 +792,12 @@ endef
 Package/libffmpeg-audio-dec/install = $(Package/libffmpeg-custom/install)
 
 $(eval $(call BuildPackage,ffmpeg))
-$(eval $(call BuildPackage,ffprobe))
-$(eval $(call BuildPackage,ffserver))
+# ffserver is borken, fix later
+#$(eval $(call BuildPackage,ffprobe))
+#$(eval $(call BuildPackage,ffserver))
 $(eval $(call BuildPackage,ffmpeg-custom))
-$(eval $(call BuildPackage,ffprobe-custom))
-$(eval $(call BuildPackage,ffserver-custom))
+#$(eval $(call BuildPackage,ffprobe-custom))
+#$(eval $(call BuildPackage,ffserver-custom))
 $(eval $(call BuildPackage,libffmpeg-audio-dec))
 $(eval $(call BuildPackage,libffmpeg-full))
 $(eval $(call BuildPackage,libffmpeg-mini))
