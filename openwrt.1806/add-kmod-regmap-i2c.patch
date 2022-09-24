@@ -1,0 +1,18 @@
+diff --git a/package/kernel/linux/modules/other.mk b/package/kernel/linux/modules/other.mk
+index ecf222a..35d1853 100644
+--- a/package/kernel/linux/modules/other.mk
++++ b/package/kernel/linux/modules/other.mk
+@@ -1112,3 +1112,13 @@ define KernelPackage/it87-wdt/description
+ endef
+ 
+ $(eval $(call KernelPackage,it87-wdt))
++
++define KernelPackage/regmap-i2c
++  SUBMENU:=$(OTHER_MENU)
++  TITLE:=regmap i2c
++  KCONFIG:=CONFIG_REGMAP_I2c
++  FILES:=$(LINUX_DIR)/drivers/base/regmap-i2c.ko
++  AUTOLOAD:=$(call AutoLoad,50,regmap-i2c.ko,1)
++endef
++
++$(eval $(call KernelPackage,regmap-i2c))

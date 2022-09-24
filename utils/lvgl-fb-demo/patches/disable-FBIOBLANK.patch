@@ -1,0 +1,18 @@
+diff --git a/lv_drivers/display/fbdev.c b/lv_drivers/display/fbdev.c
+index fe8d2ff..7ca425a 100644
+--- a/lv_drivers/display/fbdev.c
++++ b/lv_drivers/display/fbdev.c
+@@ -98,11 +98,13 @@ void fbdev_init(void)
+     }
+     LV_LOG_INFO("The framebuffer device was opened successfully");
+ 
++/*
+     // Make sure that the display is on.
+     if (ioctl(fbfd, FBIOBLANK, FB_BLANK_UNBLANK) != 0) {
+         perror("ioctl(FBIOBLANK)");
+         return;
+     }
++*/
+ 
+ #if USE_BSD_FBDEV
+     struct fbtype fb;
