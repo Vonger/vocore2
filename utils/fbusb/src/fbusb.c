@@ -49,7 +49,6 @@ struct fbusb_par {
 	char cmd[6];		/* store write frame command */
 	u32 palette[FBUSB_PALETTE_SIZE];
 	int screen_size;	/* real used size, not aligned page */
-	int sync_counter;	/* counter to notify refresh thread */
 };
 
 struct fbusb_info {
@@ -59,7 +58,7 @@ struct fbusb_info {
 	struct usb_device *udev;
 	u16 command;
 	u32 frame_count;
-	int pause;
+	long pause;
 
 	/* touch screen parameters */
 	struct input_dev *input;
@@ -129,12 +128,6 @@ static struct notifier_block fbusb_reboot_notifier = {
 	.notifier_call = fbusb_reboot_callback,
 };
 
-static int fbusb_sync(struct fb_info *info)
-{
-	struct fbusb_par *par = info->par;
-	return ++par->sync_counter;
-}
-
 static struct fb_ops fbusb_ops = {
 	.owner = THIS_MODULE,
 	.fb_read = fbusb_read,
@@ -143,7 +136,6 @@ static struct fb_ops fbusb_ops = {
 	.fb_fillrect = fbusb_fillrect,
 	.fb_copyarea = fbusb_copyarea,
 	.fb_imageblit = fbusb_imageblit,
-	.fb_sync = fbusb_sync,
 };
 
 static int fbusb_update_frame(struct fbusb_info *uinfo)
@@ -204,14 +196,6 @@ static int fbusb_refresh_thread(void *data)
 		// pause < 0, it will stop send any frame.
 		// pause > 0, sleep milliseconds.
 		if (uinfo->pause == 0) {
-			// check if there is any write the the memory, if not we do nothing.
-			// no need to update the screen frame.
-			if (par->sync_counter == 0) {
-				msleep(20);
-				continue;
-			}
-			par->sync_counter = 0;
-
 			if (fbusb_update_frame(uinfo) < 0)
 				uinfo->pause = FBUSB_PAUSE_INFINIT;
 			if (fbusb_send_command(uinfo) < 0)
@@ -352,7 +336,7 @@ static ssize_t fbusb_pause_store(struct device *dev,
 				 size_t count)
 {
 	struct fbusb_info *uinfo = dev_get_drvdata(dev);
-	kstrtoint(buf, 10, &uinfo->pause);
+	kstrtol(buf, 10, &uinfo->pause);
 	return count;
 }
 
