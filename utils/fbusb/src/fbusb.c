@@ -200,20 +200,20 @@ static int fbusb_refresh_thread(void *data)
 	fbusb_send_command(uinfo);
 
 	while (!kthread_should_stop()) {
-		/* pause == 0 means not pause.
-		 * pause < 0, it will stop send any frame.
-		 * pause > 0, sleep milliseconds. */
-		if (!uinfo->pause) {
-			/* check if there is any write to the memory, 
-			 * if not we do not need to update screen. */
+		// pause == 0 means not pause.
+		// pause < 0, it will stop send any frame.
+		// pause > 0, sleep milliseconds.
+		if (uinfo->pause == 0) {
+			// check if there is any write the the memory, if not we do nothing.
+			// no need to update the screen frame.
 			if (par->sync_counter == 0) {
-				msleep(30);
-			} else {
-                par->sync_counter = 0;
-                if (fbusb_update_frame(uinfo) < 0) {
-                    uinfo->pause = FBUSB_PAUSE_INFINIT;
-            }
-            
+				msleep(20);
+				continue;
+			}
+			par->sync_counter = 0;
+
+			if (fbusb_update_frame(uinfo) < 0)
+				uinfo->pause = FBUSB_PAUSE_INFINIT;
 			if (fbusb_send_command(uinfo) < 0)
 				uinfo->pause = FBUSB_PAUSE_INFINIT;
 		} else {
