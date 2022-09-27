@@ -209,12 +209,11 @@ static int fbusb_refresh_thread(void *data)
 			if (par->sync_counter == 0) {
 				msleep(30);
 			} else {
-				par->sync_counter = 0;
-				if (fbusb_update_frame(uinfo) < 0) {
-					uinfo->pause = FBUSB_PAUSE_INFINIT;
-				}
-			}
-
+                par->sync_counter = 0;
+                if (fbusb_update_frame(uinfo) < 0) {
+                    uinfo->pause = FBUSB_PAUSE_INFINIT;
+            }
+            
 			if (fbusb_send_command(uinfo) < 0)
 				uinfo->pause = FBUSB_PAUSE_INFINIT;
 		} else {
@@ -349,8 +348,8 @@ static ssize_t fbusb_pause_show(struct device *dev,
 }
 
 static ssize_t fbusb_pause_store(struct device *dev,
-				 struct device_attribute *attr,
-				 const char *buf, size_t count)
+				 struct device_attribute *attr, const char *buf,
+				 size_t count)
 {
 	struct fbusb_info *uinfo = dev_get_drvdata(dev);
 	kstrtoint(buf, 10, &uinfo->pause);
@@ -371,26 +370,23 @@ static int fbusb_get_info(struct fbusb_info *uinfo)
 
 	uinfo->cmd_len = 5;
 
-	ret =
-	    usb_control_msg(uinfo->udev,
-			    usb_sndctrlpipe(uinfo->udev, 0), 0xb5, 0x40,
-			    0, 0, uinfo->cmd, uinfo->cmd_len, FBUSB_MAX_DELAY);
+	ret = usb_control_msg(uinfo->udev, usb_sndctrlpipe(uinfo->udev, 0),
+			      0xb5, 0x40, 0, 0, uinfo->cmd, uinfo->cmd_len,
+			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
 
 	uinfo->cmd_len = 1;
-	ret =
-	    usb_control_msg(uinfo->udev,
-			    usb_rcvctrlpipe(uinfo->udev, 0), 0xb6, 0xc0,
-			    0, 0, uinfo->cmd, uinfo->cmd_len, FBUSB_MAX_DELAY);
+	ret = usb_control_msg(uinfo->udev, usb_rcvctrlpipe(uinfo->udev, 0),
+			      0xb6, 0xc0, 0, 0, uinfo->cmd, uinfo->cmd_len,
+			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
 
 	uinfo->cmd_len = 5;
-	ret =
-	    usb_control_msg(uinfo->udev,
-			    usb_rcvctrlpipe(uinfo->udev, 0), 0xb7, 0xc0,
-			    0, 0, uinfo->cmd, uinfo->cmd_len, FBUSB_MAX_DELAY);
+	ret = usb_control_msg(uinfo->udev, usb_rcvctrlpipe(uinfo->udev, 0),
+			      0xb7, 0xc0, 0, 0, uinfo->cmd, uinfo->cmd_len,
+			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
 
@@ -410,26 +406,23 @@ static int fbusb_get_version(struct fbusb_info *uinfo)
 
 	uinfo->cmd_len = 5;
 
-	ret =
-	    usb_control_msg(uinfo->udev,
-			    usb_sndctrlpipe(uinfo->udev, 0), 0xb5, 0x40,
-			    0, 0, uinfo->cmd, uinfo->cmd_len, FBUSB_MAX_DELAY);
+	ret = usb_control_msg(uinfo->udev, usb_sndctrlpipe(uinfo->udev, 0),
+			      0xb5, 0x40, 0, 0, uinfo->cmd, uinfo->cmd_len,
+			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
 
 	uinfo->cmd_len = 1;
-	ret =
-	    usb_control_msg(uinfo->udev,
-			    usb_rcvctrlpipe(uinfo->udev, 0), 0xb6, 0xc0,
-			    0, 0, uinfo->cmd, uinfo->cmd_len, FBUSB_MAX_DELAY);
+	ret = usb_control_msg(uinfo->udev, usb_rcvctrlpipe(uinfo->udev, 0),
+			      0xb6, 0xc0, 0, 0, uinfo->cmd, uinfo->cmd_len,
+			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
 
 	uinfo->cmd_len = 5;
-	ret =
-	    usb_control_msg(uinfo->udev,
-			    usb_rcvctrlpipe(uinfo->udev, 0), 0xb7, 0xc0,
-			    0, 0, uinfo->cmd, uinfo->cmd_len, FBUSB_MAX_DELAY);
+	ret = usb_control_msg(uinfo->udev, usb_rcvctrlpipe(uinfo->udev, 0),
+			      0xb7, 0xc0, 0, 0, uinfo->cmd, uinfo->cmd_len,
+			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
 
