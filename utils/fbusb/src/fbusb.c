@@ -194,18 +194,15 @@ static int fbusb_refresh_thread(void *data)
 	while (!kthread_should_stop()) {
 		// pause == 0 means not pause.
 		// pause < 0, it will stop send any frame.
-		// pause > 0, sleep milliseconds.
-		if (uinfo->pause == 0) {
-			if (fbusb_update_frame(uinfo) < 0)
-				uinfo->pause = FBUSB_PAUSE_INFINIT;
-			if (fbusb_send_command(uinfo) < 0)
-				uinfo->pause = FBUSB_PAUSE_INFINIT;
+		// pause > 0, sleep milliseconds and send frame.
+		if (uinfo->pause >= 0) {
+			msleep(uinfo->pause);
+                        if (fbusb_update_frame(uinfo) < 0)
+                                uinfo->pause = FBUSB_PAUSE_INFINIT;
+                        if (fbusb_send_command(uinfo) < 0)
+                                uinfo->pause = FBUSB_PAUSE_INFINIT;
 		} else {
-			if (uinfo->pause < 0) {
-				ssleep(1);
-			} else {
-				msleep(uinfo->pause);
-			}
+			ssleep(1);
 		}
 		uinfo->frame_count++;
 	}
