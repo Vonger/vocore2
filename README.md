@@ -24,6 +24,22 @@ cd ./package
 git clone https://github.com/vonger/vocore2.git
 ```
 
+## For OpenWrt 22.03
+
+1. sdcard
+
+```
+patch -p1 < package/vocore2/openwrt.2102/vocore2-sdcard-support.patch
+```
+
+2. audio
+
+```
+patch -p1 < package/vocore2/openwrt.2203/vocore2-fixmaster-es8388.patch
+cp package/vocore2/openwrt.2203/0810-sound-es8388-aplay.patch target/linux/ramips/patches-5.10/
+cp ./package/vocore2/openwrt.1907/0882-pinctrl-fix-gpio-name.patch target/linux/ramips/patches-5.10/
+```
+
 ## For OpenWrt 19.07
 
 1. apply patch for mt76 to support switch between 1T1R and 2T2R.
