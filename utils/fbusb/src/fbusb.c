@@ -28,6 +28,7 @@
 #define FBUSB_PALETTE_SIZE	16
 #define FBUSB_SCREEN_BUFFER	58
 #define FBUSB_MAX_DELAY		100
+#define FBUSB_PAUSE_INFINIT -1
 
 static const struct fb_fix_screeninfo fbusb_fix = {
 	.id = "fbusb",
@@ -45,7 +46,7 @@ static const struct fb_var_screeninfo fbusb_var = {
 
 struct fbusb_par {
 	struct fb_info *info;
-	char cmd[6];
+	char cmd[6];		/* store write frame command */
 	u32 palette[FBUSB_PALETTE_SIZE];
 	int screen_size;	/* real used size, not aligned page */
 };
@@ -57,7 +58,7 @@ struct fbusb_info {
 	struct usb_device *udev;
 	u16 command;
 	u32 frame_count;
-	u8 pause;
+	long pause;
 
 	/* touch screen parameters */
 	struct input_dev *input;
@@ -115,7 +116,7 @@ static int fbusb_reboot_callback(struct notifier_block *self,
 {
 	if (val == SYS_RESTART) {
 		if (cur_uinfo) {
-			cur_uinfo->pause = 1;
+			cur_uinfo->pause = FBUSB_PAUSE_INFINIT;
 			msleep(100);
 		}
 	}
@@ -150,11 +151,13 @@ static int fbusb_update_frame(struct fbusb_info *uinfo)
 			      FBUSB_MAX_DELAY);
 	if (ret < 0)
 		return ret;
+
 	ret =
 	    usb_bulk_msg(udev, usb_sndbulkpipe(udev, 0x02), info->screen_buffer,
 			 par->screen_size, NULL, FBUSB_MAX_DELAY);
 	if (ret < 0)
 		return ret;
+
 	return 0;
 }
 
@@ -189,11 +192,15 @@ static int fbusb_refresh_thread(void *data)
 	fbusb_send_command(uinfo);
 
 	while (!kthread_should_stop()) {
-		if (!uinfo->pause) {
-			if (fbusb_update_frame(uinfo) < 0)
-				uinfo->pause = 1;
-			if (fbusb_send_command(uinfo) < 0)
-				uinfo->pause = 1;
+		// pause == 0 means not pause.
+		// pause < 0, it will stop send any frame.
+		// pause > 0, sleep milliseconds and send frame.
+		if (uinfo->pause >= 0) {
+			msleep(uinfo->pause);
+                        if (fbusb_update_frame(uinfo) < 0)
+                                uinfo->pause = FBUSB_PAUSE_INFINIT;
+                        if (fbusb_send_command(uinfo) < 0)
+                                uinfo->pause = FBUSB_PAUSE_INFINIT;
 		} else {
 			ssleep(1);
 		}
@@ -326,8 +333,7 @@ static ssize_t fbusb_pause_store(struct device *dev,
 				 size_t count)
 {
 	struct fbusb_info *uinfo = dev_get_drvdata(dev);
-	if (buf[0] == '0' || buf[0] == '1')
-		uinfo->pause = buf[0] - '0';
+	kstrtol(buf, 10, &uinfo->pause);
 	return count;
 }
 
@@ -350,22 +356,22 @@ static int fbusb_get_info(struct fbusb_info *uinfo)
 			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
-    
+
 	uinfo->cmd_len = 1;
 	ret = usb_control_msg(uinfo->udev, usb_rcvctrlpipe(uinfo->udev, 0),
 			      0xb6, 0xc0, 0, 0, uinfo->cmd, uinfo->cmd_len,
 			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
-    
+
 	uinfo->cmd_len = 5;
 	ret = usb_control_msg(uinfo->udev, usb_rcvctrlpipe(uinfo->udev, 0),
 			      0xb7, 0xc0, 0, 0, uinfo->cmd, uinfo->cmd_len,
 			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
-	
-    uinfo->cmd_len = 0;
+
+	uinfo->cmd_len = 0;
 	return 1;
 }
 
@@ -386,21 +392,21 @@ static int fbusb_get_version(struct fbusb_info *uinfo)
 			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
-    
+
 	uinfo->cmd_len = 1;
 	ret = usb_control_msg(uinfo->udev, usb_rcvctrlpipe(uinfo->udev, 0),
 			      0xb6, 0xc0, 0, 0, uinfo->cmd, uinfo->cmd_len,
 			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
-    
+
 	uinfo->cmd_len = 5;
 	ret = usb_control_msg(uinfo->udev, usb_rcvctrlpipe(uinfo->udev, 0),
 			      0xb7, 0xc0, 0, 0, uinfo->cmd, uinfo->cmd_len,
 			      FBUSB_MAX_DELAY);
 	if (ret < uinfo->cmd_len)
 		return -1;
-    
+
 	uinfo->cmd_len = 0;
 	return 1;
 }
@@ -448,12 +454,12 @@ static int fbusb_probe(struct usb_interface *interface,
 	dev_info(&interface->dev, "screen version code:  %08x\n",
 		 uinfo->version_info);
 
-    uinfo->width = 480;
-    uinfo->height = 800;
-    uinfo->margin = 0;
-    
+	uinfo->width = 480;
+	uinfo->height = 800;
+	uinfo->margin = 0;
+
 	if (uinfo->screen_info == 0x00000005) {
-        uinfo->height = 854;
+		uinfo->height = 854;
 		uinfo->margin = 320;
 		if (uinfo->version_info == 0xffffffff)
 			model_string = "5inch, 480x854x16/24, SLM5.0-81FPC-A";
