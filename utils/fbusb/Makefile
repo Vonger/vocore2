@@ -13,7 +13,8 @@ define KernelPackage/fbusb
   SECTION:=vocore2
   CATEGORY:=VoCore2
   AUTOLOAD:=$(call AutoLoad,01,fbusb)
-  DEPENDS:=+kmod-usb-core +kmod-usb-hid +kmod-fb +kmod-vga-console
+  DEPENDS:=+kmod-usb-core +kmod-usb-hid +kmod-fb +kmod-vga-console \
+           +kmod-fb-sys-fops +kmod-fb-sys-ram +kmod-fb-tft
 endef
 
 define KernelPackage/fbusb/description
@@ -25,6 +26,8 @@ MAKE_OPTS:= \
 	CROSS_COMPILE="$(TARGET_CROSS)" \
 	SUBDIRS="$(PKG_BUILD_DIR)" \
 	M="$(PKG_BUILD_DIR)"
+
+
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)

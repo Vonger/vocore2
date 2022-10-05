@@ -83,34 +83,6 @@ struct fbusb_info {
 
 static struct fbusb_info *cur_uinfo;
 
-/* FIXME: in this file functions is copied and modified from linux kernel source
- * code, in order to make it easy compile without addition depends, should be 
- * removed for later version. */
-#include "fbusb_common.c"
-
-static int fbusb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
-			   u_int transp, struct fb_info *info)
-{
-	u32 *pal = info->pseudo_palette;
-	u32 cr = red >> (16 - info->var.red.length);
-	u32 cg = green >> (16 - info->var.green.length);
-	u32 cb = blue >> (16 - info->var.blue.length);
-	u32 value;
-
-	if (regno >= FBUSB_PALETTE_SIZE)
-		return -EINVAL;
-
-	value = (cr << info->var.red.offset) |
-	    (cg << info->var.green.offset) | (cb << info->var.blue.offset);
-	if (info->var.transp.length > 0) {
-		u32 mask = (1 << info->var.transp.length) - 1;
-		mask <<= info->var.transp.offset;
-		value |= mask;
-	}
-	pal[regno] = value;
-	return 0;
-}
-
 static int fbusb_reboot_callback(struct notifier_block *self,
 				 unsigned long val, void *data)
 {
@@ -130,12 +102,12 @@ static struct notifier_block fbusb_reboot_notifier = {
 
 static struct fb_ops fbusb_ops = {
 	.owner = THIS_MODULE,
-	.fb_read = fbusb_read,
-	.fb_write = fbusb_write,
-	.fb_setcolreg = fbusb_setcolreg,
-	.fb_fillrect = fbusb_fillrect,
-	.fb_copyarea = fbusb_copyarea,
-	.fb_imageblit = fbusb_imageblit,
+	.fb_read = fb_sys_read,
+	.fb_write = fb_sys_write,
+//	.fb_setcolreg = cfb_setcolreg,
+	.fb_fillrect = sys_fillrect,
+	.fb_copyarea = sys_copyarea,
+	.fb_imageblit = sys_imageblit,
 };
 
 static int fbusb_update_frame(struct fbusb_info *uinfo)
