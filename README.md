@@ -12,6 +12,19 @@ For detailed tutorial, please check vonger.cn, Beginner Tutorial. If you are new
 Please follow my steps in order to avoid issue. "path/to/" is your openwrt location.
 Please use Linux, MacOS or other Unix compatible system to compile it, the file system must be case sensitive. 
 
+## Use container (optional)
+
+if your host compiler is too new for openwrt, or you want compile openwrt on a clean environment. you can use container to compile openwrt:
+
+```
+$ cd ./docker/
+$ docker build -t vocore2-dev .
+$ docker run --name vocore2-dev vocore2-dev
+$ docker export vocore2-dev | tar2sqfs vocore2-dev.sqfs
+$ singularity shell -e vocore2-dev.sqfs # use it
+singularity> cd /path/to/openwrt # and more, see below
+```
+
 ## Download Patch
 
 ```sh
