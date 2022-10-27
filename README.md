@@ -171,3 +171,38 @@ We can debug and develop based on Qt creator(or Eclipse if you like Java)
 Setup VM and Compile OpenWrt: https://www.youtube.com/watch?v=ocl6yFtKSNs
 
 Another Setup and Compile: http://vonger.cn/?s=Beginner
+
+# mainline uboot support
+
+Now VoCore2 has mainline uboot available, but need more testing to verify that everything is stable.
+
+if you need it, see below:
+
+before replace uboot ,you need read how to fix dead uboot: https://vonger.cn/?p=8054
+
+flash layout difference of mainline uboot and ralink uboot:
+
+mainline uboot:
+
+https://source.denx.de/u-boot/u-boot/-/blob/master/configs/vocore2_defconfig
+
+| uboot | uboot-env | factory |  firmware |
+|-------|-----------|---------|-----------|
+| 312k  |    4k     |    4k   |    -      |
+
+uboot from mtk:
+
+http://vonger.cn/upload/uboot.source.zip
+
+| uboot | uboot-env | factory |  firmware |
+|-------|-----------|---------|-----------|
+| 192k  |    64k    |    64k  |    -      |
+
+
+mainline uboot's layout can include more code in uboot, but it not compatible with the mtk's uboot.
+
+if you need 192k mainline uboot, please use uboot/vocore2_defconfig to compile maineline uboot:
+
+```
+cp path/to/thisrepo/uboot/vocore2_defconfig path/to/mainlineubootsrc/.config
+```
