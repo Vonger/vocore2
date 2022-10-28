@@ -206,3 +206,5 @@ if you need 192k mainline uboot, please use uboot/vocore2_defconfig to compile m
 ```
 cp path/to/thisrepo/uboot/vocore2_defconfig path/to/mainlineubootsrc/.config
 ```
+
+note: before replace uboot, you must ensure your 'u-boot-with-spl.bin' size is < 192k
