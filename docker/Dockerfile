@@ -7,7 +7,7 @@ COPY apt-sources.list /etc/apt/sources.list
 
 RUN apt update -y && \
     apt install -y --no-install-recommends \
-    bc build-essential bzip2 ca-certificates ccache clang cmake \
+    bc bison build-essential bzip2 ca-certificates ccache clang cmake \
     cpio curl cvs diffutils ecj fastjar file findutils flex gawk \
     gcc-multilib gettext git gkermit grep gzip java-propose-classpath \
     libelf-dev libncurses5-dev libssl-dev locales lrzsz mercurial \
