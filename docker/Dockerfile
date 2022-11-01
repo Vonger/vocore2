@@ -13,7 +13,7 @@ RUN apt update -y && \
     libelf-dev libncurses5-dev libssl-dev locales lrzsz mercurial \
     python2 python2-dev python3 python3-dev rsync screen sed subversion \
     swig tar time tmux unzip util-linux wget xsltproc xz-utils zlib1g-dev \
-    nvi cscope openssh-client dropbear-bin \
+    nvi cscope openssh-client dropbear-bin sparse\
     && \
     apt autoremove -y && \
     apt clean -y
