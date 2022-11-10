@@ -2,6 +2,9 @@
 BR2_mipsel=y
 BR2_mips_32r2=y
 
+# toolchain
+BR2_TOOLCHAIN_BUILDROOT_VENDOR="mt76x8"
+
 # kernel
 BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
