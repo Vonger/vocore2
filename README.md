@@ -131,8 +131,8 @@ cp ./package/vocore2/openwrt.1806/mt7628/openwrt/080-*.patch ./package/network/u
 
   ```sh
 cd path/to/openwrt
-patch -p1 < ./package/vocore2/openwrt.1806/es8388/*.patch
-cp ./package/vocore2/openwrt.1806/810-*.patch ./target/linux/ramips/patches-4.14
+patch -p1 < ./package/vocore2/openwrt.1806/es8388/000-*.patch
+cp ./package/vocore2/openwrt.1806/es8388/810-*.patch ./target/linux/ramips/patches-4.14
 cp ./package/vocore2/openwrt.1806/0045-*.patch ./target/linux/ramips/patches-4.14
   ```
   
