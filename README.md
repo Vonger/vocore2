@@ -216,9 +216,9 @@ add buildroot support in ./buildroot-*, use for mainline kernel build and mainli
 how to use:
 
 ```
-git clone https://github.com/buildroot/buildroot -b 2022.02.6 --depth=1
+git clone https://github.com/buildroot/buildroot --depth=1
 cd buildroot
-export BR2_EXTERNAL=/path/to/repo/buildroot-2022.02.6/
+export BR2_EXTERNAL=/path/to/repo/buildroot/
 make vocore2_defconfig
 make menuconfig
 make -j4

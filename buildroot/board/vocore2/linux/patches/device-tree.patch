@@ -1,0 +1,320 @@
+diff --git a/arch/mips/boot/dts/ralink/mt7628a.dtsi b/arch/mips/boot/dts/ralink/mt7628a.dtsi
+index 45bf96a3d17a..7b2c64f9bf39 100644
+--- a/arch/mips/boot/dts/ralink/mt7628a.dtsi
++++ b/arch/mips/boot/dts/ralink/mt7628a.dtsi
+@@ -41,99 +41,6 @@ sysc: system-controller@0 {
+ 			reg = <0x0 0x60>;
+ 		};
+ 
+-		pinmux: pinmux@60 {
+-			compatible = "pinctrl-single";
+-			reg = <0x60 0x8>;
+-			#address-cells = <1>;
+-			#size-cells = <0>;
+-			#pinctrl-cells = <2>;
+-			pinctrl-single,bit-per-mux;
+-			pinctrl-single,register-width = <32>;
+-			pinctrl-single,function-mask = <0x1>;
+-
+-			pinmux_gpio_gpio: pinmux_gpio_gpio {
+-				pinctrl-single,bits = <0x0 0x0 0x3>;
+-			};
+-
+-			pinmux_spi_cs1_cs: pinmux_spi_cs1_cs {
+-				pinctrl-single,bits = <0x0 0x0 0x30>;
+-			};
+-
+-			pinmux_i2s_gpio: pinmux_i2s_gpio {
+-				pinctrl-single,bits = <0x0 0x40 0xc0>;
+-			};
+-
+-			pinmux_uart0_uart: pinmux_uart0_uart0 {
+-				pinctrl-single,bits = <0x0 0x0 0x300>;
+-			};
+-
+-			pinmux_sdmode_sdxc: pinmux_sdmode_sdxc {
+-				pinctrl-single,bits = <0x0 0x0 0xc00>;
+-			};
+-
+-			pinmux_sdmode_gpio: pinmux_sdmode_gpio {
+-				pinctrl-single,bits = <0x0 0x400 0xc00>;
+-			};
+-
+-			pinmux_spi_spi: pinmux_spi_spi {
+-				pinctrl-single,bits = <0x0 0x0 0x1000>;
+-			};
+-
+-			pinmux_refclk_gpio: pinmux_refclk_gpio {
+-				pinctrl-single,bits = <0x0 0x40000 0x40000>;
+-			};
+-
+-			pinmux_i2c_i2c: pinmux_i2c_i2c {
+-				pinctrl-single,bits = <0x0 0x0 0x300000>;
+-			};
+-
+-			pinmux_uart1_uart: pinmux_uart1_uart1 {
+-				pinctrl-single,bits = <0x0 0x0 0x3000000>;
+-			};
+-
+-			pinmux_uart2_uart: pinmux_uart2_uart {
+-				pinctrl-single,bits = <0x0 0x0 0xc000000>;
+-			};
+-
+-			pinmux_pwm0_pwm: pinmux_pwm0_pwm {
+-				pinctrl-single,bits = <0x0 0x0 0x30000000>;
+-			};
+-
+-			pinmux_pwm0_gpio: pinmux_pwm0_gpio {
+-				pinctrl-single,bits = <0x0 0x10000000
+-						       0x30000000>;
+-			};
+-
+-			pinmux_pwm1_pwm: pinmux_pwm1_pwm {
+-				pinctrl-single,bits = <0x0 0x0 0xc0000000>;
+-			};
+-
+-			pinmux_pwm1_gpio: pinmux_pwm1_gpio {
+-				pinctrl-single,bits = <0x0 0x40000000
+-						       0xc0000000>;
+-			};
+-
+-			pinmux_p0led_an_gpio: pinmux_p0led_an_gpio {
+-				pinctrl-single,bits = <0x4 0x4 0xc>;
+-			};
+-
+-			pinmux_p1led_an_gpio: pinmux_p1led_an_gpio {
+-				pinctrl-single,bits = <0x4 0x10 0x30>;
+-			};
+-
+-			pinmux_p2led_an_gpio: pinmux_p2led_an_gpio {
+-				pinctrl-single,bits = <0x4 0x40 0xc0>;
+-			};
+-
+-			pinmux_p3led_an_gpio: pinmux_p3led_an_gpio {
+-				pinctrl-single,bits = <0x4 0x100 0x300>;
+-			};
+-
+-			pinmux_p4led_an_gpio: pinmux_p4led_an_gpio {
+-				pinctrl-single,bits = <0x4 0x400 0xc00>;
+-			};
+-		};
+-
+ 		watchdog: watchdog@100 {
+ 			compatible = "mediatek,mt7621-wdt";
+ 			reg = <0x100 0x30>;
+@@ -188,7 +95,7 @@ spi: spi@b00 {
+ 			reg = <0xb00 0x100>;
+ 
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&pinmux_spi_spi>;
++			pinctrl-0 = <&spi_pins>;
+ 
+ 			resets = <&resetc 18>;
+ 			reset-names = "spi";
+@@ -204,7 +111,7 @@ i2c: i2c@900 {
+ 			reg = <0x900 0x100>;
+ 
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&pinmux_i2c_i2c>;
++			pinctrl-0 = <&i2c_pins>;
+ 
+ 			resets = <&resetc 16>;
+ 			reset-names = "i2c";
+@@ -215,12 +122,14 @@ i2c: i2c@900 {
+ 			status = "disabled";
+ 		};
+ 
+-		uart0: uartlite@c00 {
++		uartlite: uartlite@c00 {
+ 			compatible = "ns16550a";
+ 			reg = <0xc00 0x100>;
+ 
++			no-loopback-test;
++
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&pinmux_uart0_uart>;
++			pinctrl-0 = <&uart0_pins>;
+ 
+ 			resets = <&resetc 12>;
+ 			reset-names = "uart0";
+@@ -229,14 +138,17 @@ uart0: uartlite@c00 {
+ 			interrupts = <20>;
+ 
+ 			reg-shift = <2>;
++			reg-io-width = <4>;
+ 		};
+ 
+ 		uart1: uart1@d00 {
+ 			compatible = "ns16550a";
+ 			reg = <0xd00 0x100>;
+ 
++			no-loopback-test;
++
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&pinmux_uart1_uart>;
++			pinctrl-0 = <&uart1_pins>;
+ 
+ 			resets = <&resetc 19>;
+ 			reset-names = "uart1";
+@@ -245,14 +157,18 @@ uart1: uart1@d00 {
+ 			interrupts = <21>;
+ 
+ 			reg-shift = <2>;
++			reg-io-width = <4>;
++			status = "disabled";
+ 		};
+ 
+ 		uart2: uart2@e00 {
+ 			compatible = "ns16550a";
+ 			reg = <0xe00 0x100>;
+ 
++			no-loopback-test;
++
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&pinmux_uart2_uart>;
++			pinctrl-0 = <&uart2_pins>;
+ 
+ 			resets = <&resetc 20>;
+ 			reset-names = "uart2";
+@@ -261,6 +177,51 @@ uart2: uart2@e00 {
+ 			interrupts = <22>;
+ 
+ 			reg-shift = <2>;
++			reg-io-width = <4>;
++			status = "disabled";
++		};
++	};
++
++	pinctrl: pinctrl {
++		compatible = "ralink,mt7620-pinctrl";
++		pinctrl-names = "default";
++		pinctrl-0 = <&state_default>;
++
++		state_default: pinctrl0 {
++		};
++
++		uart0_pins: uartlite {
++			uartlite {
++				groups = "uart0";
++				function = "uart0";
++			};
++		};
++
++		uart1_pins: uart1 {
++			uart1 {
++				groups = "uart1";
++				function = "uart1";
++			};
++		};
++
++		uart2_pins: uart2 {
++			uart2 {
++				groups = "uart2";
++				function = "uart2";
++			};
++		};
++
++		spi_pins: spi_pins {
++			spi_pins {
++				groups = "spi";
++				function = "spi";
++			};
++		};
++		i2c_pins: i2c_pins {
++			i2c_pins {
++				groups = "i2c";
++				function = "i2c";
++			};
+ 		};
+ 	};
+ 
+diff --git a/arch/mips/boot/dts/ralink/vocore2.dts b/arch/mips/boot/dts/ralink/vocore2.dts
+index fa8a5f8f236a..f6ea0f6297cc 100644
+--- a/arch/mips/boot/dts/ralink/vocore2.dts
++++ b/arch/mips/boot/dts/ralink/vocore2.dts
+@@ -12,7 +12,84 @@ memory@0 {
+ 	};
+ 
+ 	chosen {
+-		bootargs = "console=ttyS2,115200";
++		/* I don't know why uart2 is register to ttyS0 */
++		/* but it works. */
++		bootargs = "console=ttyS0,115200 root=/dev/mtdblock4 rootwait";
+ 		stdout-path = &uart2;
+ 	};
++
++};
++
++&spi {
++	status = "okay";
++
++        flash@0 {
++                compatible = "jedec,spi-nor";
++                reg = <0>;
++                spi-max-frequency = <10000000>;
++
++                partitions {
++                        compatible = "fixed-partitions";
++			#address-cells = <1>;
++                        #size-cells = <1>;
++
++                        partition@0 {
++                                label = "u-boot";
++                                reg = <0x0 0x30000>;
++                                read-only;
++                        };
++
++                        partition@30000 {
++                                label = "u-boot-env";
++                                reg = <0x30000 0x10000>;
++                                read-only;
++                        };
++
++                        factory: partition@40000 {
++                                label = "factory";
++                                reg = <0x40000 0x10000>;
++                                read-only;
++                        };
++
++                        kernel: partition@50000 {
++				label = "kernel";
++				reg = <0x50000 0x3b0000>;
++                        };
++			rootfs: partition@400000 {
++				label = "rootfs";
++				reg = <0x400000 0x800000>;
++			};
++                };
++        };
++};
++
++&watchdog {
++        status = "okay";
++};
++
++&uart1 {
++	status = "okay";
++};
++
++&uart2 {
++	status = "okay";
++};
++
++&i2c {
++        status = "okay";
++};
++
++&wmac {
++	status = "okay";
++	mediatek,mtd-eeprom = <&factory 0x0>;
++};
++
++&factory {
++	compatible = "nvmem-cells";
++	#address-cells = <1>;
++	#size-cells = <1>;
++
++	macaddr_factory_28: macaddr@28 {
++		reg = <0x28 0x6>;
++	};
+ };

@@ -1,0 +1,17 @@
+config BR2_PACKAGE_MT76_FIRMWARE
+	bool "mt76-firmware"
+	help
+	  This package provides various binary firmware files (closed
+	  binary blobs) for mt76 devices's WLAN cards.
+
+	  https://github.com/openwrt/mt76
+
+if BR2_PACKAGE_MT76_FIRMWARE
+
+
+config BR2_PACKAGE_MT76_FIRMWARE_MT7628
+	bool "mt7628 firmware"
+	help
+	  Firmware for mt7628's wifi mcu.
+
+endif
