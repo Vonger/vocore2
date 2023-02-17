@@ -17,7 +17,3 @@ genimage \
   --config "${GENIMAGE_CFG}"
 
 cd $BINARIES_DIR
-
-# create a 4M image, use for qemu.
-dd if=./flash_16M.bin bs=1M count=4 of=flash_4M.bin
-
