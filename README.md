@@ -208,3 +208,18 @@ cp path/to/thisrepo/uboot/vocore2_defconfig path/to/mainlineubootsrc/.config
 ```
 
 note: before replace uboot, you must ensure your 'u-boot-with-spl.bin' size is < 192k
+
+# buildroot support
+
+add buildroot support in ./buildroot-*, use for mainline kernel build and mainline uboot build, a lot of driver not working, only for test.
+
+how to use:
+
+```
+git clone https://github.com/buildroot/buildroot --depth=1
+cd buildroot
+export BR2_EXTERNAL=/path/to/repo/buildroot/
+make vocore2_defconfig
+make menuconfig
+make -j4
+```

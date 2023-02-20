@@ -1,0 +1,56 @@
+diff --git a/target/linux/ramips/base-files/etc/board.d/02_network b/target/linux/ramips/base-files/etc/board.d/02_network
+index 50d3a89bd8..f2745409e7 100755
+--- a/target/linux/ramips/base-files/etc/board.d/02_network
++++ b/target/linux/ramips/base-files/etc/board.d/02_network
+@@ -354,8 +354,9 @@ ramips_setup_interfaces()
+ 		;;
+ 	vocore2|\
+ 	vocore2lite)
++		mem 0x1000003c 0xe001ff # 5 port setup
+ 		ucidef_add_switch "switch0" \
+-			"0:lan" "2:lan" "6t@eth0"
++			"0:wan" "1:lan" "2:lan" "3:lan" "4:lan" "6t@eth0"
+ 		;;
+ 	f5d8235-v1|\
+ 	tew-714tru|\
+diff --git a/target/linux/ramips/dts/VOCORE2.dtsi b/target/linux/ramips/dts/VOCORE2.dtsi
+index f7aec8e1f5..3fb0ee7f2e 100644
+--- a/target/linux/ramips/dts/VOCORE2.dtsi
++++ b/target/linux/ramips/dts/VOCORE2.dtsi
+@@ -4,7 +4,7 @@
+ 	compatible = "vocore,vocore2", "mediatek,mt7628an-soc";
+ 
+ 	chosen {
+-		bootargs = "console=ttyS2,115200";
++		bootargs = "console=ttyS0,115200";
+ 	};
+ };
+ 
+@@ -28,26 +28,13 @@
+ };
+ 
+ &esw {
+-	mediatek,portmap = <0x7>;
+-	mediatek,portdisable = <0x3a>;
+-};
+-
+-&i2s {
+-	status = "okay";
++	mediatek,portmap = <0x3e>;
+ };
+ 
+ &gdma {
+ 	status = "okay";
+ };
+ 
+-&pwm {
+-	status = "okay";
+-};
+-
+ &uart1 {
+ 	status = "okay";
+ };
+-
+-&uart2 {
+-	status = "okay";
+-};
