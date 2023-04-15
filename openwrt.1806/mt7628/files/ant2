@@ -10,6 +10,7 @@ change_byte() {
 }
 
 echo setting to two antennas...
+insmod w2factory.ko
 cp /dev/mtd2 /tmp/mtd2
 change_byte /tmp/mtd2 52 22
 mtd -e factory write /tmp/mtd2 factory 2> /dev/null
