@@ -104,6 +104,8 @@ Then ready to compile.
 
 ## For OpenWrt 18.06 
 
+Note: this version source code broken, patch might not work.
+
 1. patch your openwrt with necessary patches to use this driver.
 
   ```sh
