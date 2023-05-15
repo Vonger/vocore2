@@ -1,0 +1,28 @@
+# target
+BR2_mipsel=y
+BR2_mips_32r2=y
+
+# toolchain
+BR2_TOOLCHAIN_BUILDROOT_VENDOR="mt76x8"
+BR2_TOOLCHAIN_BUILDROOT_MUSL=y
+BR2_PACKAGE_HOST_GDB=y
+
+# build options
+BR2_ENABLE_LTO=y
+
+# system configuration
+BR2_TARGET_GENERIC_HOSTNAME="vocore2_flasher"
+
+# kernel
+BR2_LINUX_KERNEL=y
+BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
+BR2_LINUX_KERNEL_PATCH="$(BR2_EXTERNAL_VOCORE2_PATH)/board/vocore2_flasher/linux/patches/"
+BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="$(BR2_EXTERNAL_VOCORE2_PATH)/board/vocore2_flasher/linux/linux.config"
+BR2_LINUX_KERNEL_LZMA=y
+
+# package
+BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_VOCORE2_PATH)/board/vocore2_flasher/busybox/busybox-extra.config"
+
+# image
+# BR2_TARGET_ROOTFS_TAR is not set
+BR2_TARGET_ROOTFS_INITRAMFS=y
