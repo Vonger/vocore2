@@ -1,5 +1,7 @@
 # Welcome
 
+Because recently OpenWrt Official support is much better, the patches are not necessary anymore. For histrical reason, I will keep this.
+
 This feed enable using MTK/Ralink official wifi driver for the latest linux kernel 4.14/openwrt. It should be much stable than current mt76 driver. I patch it for my production VoCore2, but the package should be able to port to other MT76x8 based platform too.
 
 Feel free to submit patch and bug or email me at support@vocore.io 
