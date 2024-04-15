@@ -1,0 +1,12 @@
+Index: linux-5.15.153/sound/soc/ralink/ralink-i2s.c
+===================================================================
+--- linux-5.15.153.orig/sound/soc/ralink/ralink-i2s.c
++++ linux-5.15.153/sound/soc/ralink/ralink-i2s.c
+@@ -536,6 +536,7 @@ static const struct snd_dmaengine_pcm_co
+ 
+ static const struct snd_soc_component_driver ralink_i2s_component = {
+ 	.name = DRV_NAME,
++	.trigger_stop = SND_SOC_TRIGGER_ORDER_LDC,
+ };
+ 
+ static bool ralink_i2s_readable_reg(struct device *dev, unsigned int reg)

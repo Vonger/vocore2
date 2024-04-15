@@ -1,0 +1,81 @@
+From 54fc4b72b630e1cb92a21140084c6852babbb234 Mon Sep 17 00:00:00 2001
+From: Claudiu Beznea <claudiu.beznea@microchip.com>
+Date: Tue, 28 Feb 2023 13:01:43 +0200
+Subject: [PATCH 1/1] ASoC: soc-pcm: add option to start DMA after DAI
+
+Add option to start DMA component after DAI trigger. This is done
+by filling the new struct snd_soc_component_driver::start_dma_last.
+
+Signed-off-by: Claudiu Beznea <claudiu.beznea@microchip.com>
+Link: https://lore.kernel.org/r/20230228110145.3770525-2-claudiu.beznea@microchip.com
+Signed-off-by: Mark Brown <broonie@kernel.org>
+---
+ include/sound/soc-component.h |  2 ++
+ sound/soc/soc-pcm.c           | 27 ++++++++++++++++++++++-----
+ 2 files changed, 24 insertions(+), 5 deletions(-)
+
+diff --git a/include/sound/soc-component.h b/include/sound/soc-component.h
+index 3203d35bc8c15..0814ed1438640 100644
+--- a/include/sound/soc-component.h
++++ b/include/sound/soc-component.h
+@@ -190,6 +190,8 @@ struct snd_soc_component_driver {
+ 	bool use_dai_pcm_id;	/* use DAI link PCM ID as PCM device number */
+ 	int be_pcm_base;	/* base device ID for all BE PCMs */
+ 
++	unsigned int start_dma_last;
++
+ #ifdef CONFIG_DEBUG_FS
+ 	const char *debugfs_prefix;
+ #endif
+diff --git a/sound/soc/soc-pcm.c b/sound/soc/soc-pcm.c
+index 005b179a770a0..5eb056b942ce8 100644
+--- a/sound/soc/soc-pcm.c
++++ b/sound/soc/soc-pcm.c
+@@ -1088,22 +1088,39 @@ static int soc_pcm_hw_params(struct snd_pcm_substream *substream,
+ static int soc_pcm_trigger(struct snd_pcm_substream *substream, int cmd)
+ {
+ 	struct snd_soc_pcm_runtime *rtd = asoc_substream_to_rtd(substream);
+-	int ret = -EINVAL, _ret = 0;
++	struct snd_soc_component *component;
++	int ret = -EINVAL, _ret = 0, start_dma_last = 0, i;
+ 	int rollback = 0;
+ 
+ 	switch (cmd) {
+ 	case SNDRV_PCM_TRIGGER_START:
+ 	case SNDRV_PCM_TRIGGER_RESUME:
+ 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
++		/* Do we need to start dma last? */
++		for_each_rtd_components(rtd, i, component) {
++			if (component->driver->start_dma_last) {
++				start_dma_last = 1;
++				break;
++			}
++		}
++
+ 		ret = snd_soc_link_trigger(substream, cmd, 0);
+ 		if (ret < 0)
+ 			goto start_err;
+ 
+-		ret = snd_soc_pcm_component_trigger(substream, cmd, 0);
+-		if (ret < 0)
+-			goto start_err;
++		if (start_dma_last) {
++			ret = snd_soc_pcm_dai_trigger(substream, cmd, 0);
++			if (ret < 0)
++				goto start_err;
++
++			ret = snd_soc_pcm_component_trigger(substream, cmd, 0);
++		} else {
++			ret = snd_soc_pcm_component_trigger(substream, cmd, 0);
++			if (ret < 0)
++				goto start_err;
+ 
+-		ret = snd_soc_pcm_dai_trigger(substream, cmd, 0);
++			ret = snd_soc_pcm_dai_trigger(substream, cmd, 0);
++		}
+ start_err:
+ 		if (ret < 0)
+ 			rollback = 1;
+-- 
+2.39.2
+

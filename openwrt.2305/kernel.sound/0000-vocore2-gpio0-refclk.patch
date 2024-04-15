@@ -1,0 +1,20 @@
+--- a/drivers/pinctrl/ralink/pinctrl-mt7620.c
++++ b/drivers/pinctrl/ralink/pinctrl-mt7620.c
+@@ -189,7 +189,7 @@
+ 
+ static struct ralink_pmx_func gpio_grp_mt76x8[] = {
+ 	FUNC("pcie", 3, 11, 1),
+-	FUNC("refclk", 2, 11, 1),
++	FUNC("gpio refclk", 2, 11, 1),
+ 	FUNC("gpio", 1, 11, 1),
+ 	FUNC("gpio", 0, 11, 1),
+ };
+@@ -333,7 +333,7 @@
+ 				1, MT76X8_GPIO_MODE_CS1),
+ 	GRP_G("spis", spis_grp_mt76x8, MT76X8_GPIO_MODE_MASK,
+ 				1, MT76X8_GPIO_MODE_SPIS),
+-	GRP_G("gpio", gpio_grp_mt76x8, MT76X8_GPIO_MODE_MASK,
++	GRP_G("gpio0", gpio_grp_mt76x8, MT76X8_GPIO_MODE_MASK,
+ 				1, MT76X8_GPIO_MODE_GPIO),
+ 	GRP_G("wled_an", wled_an_grp_mt76x8, MT76X8_GPIO_MODE_MASK,
+ 				1, MT76X8_GPIO_MODE_WLED_AN),
