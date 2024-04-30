@@ -1,0 +1,46 @@
+diff --git a/package/kernel/linux/modules/video.mk b/package/kernel/linux/modules/video.mk
+index f1e61f33a5..a0490e9b61 100644
+--- a/package/kernel/linux/modules/video.mk
++++ b/package/kernel/linux/modules/video.mk
+@@ -277,7 +277,8 @@ define KernelPackage/drm-kms-helper
+ 	+kmod-fb-cfb-fillrect +kmod-fb-cfb-imgblt +kmod-fb-sys-ram
+   KCONFIG:= \
+     CONFIG_DRM_KMS_HELPER \
+-    CONFIG_DRM_KMS_FB_HELPER=y
++    CONFIG_DRM_KMS_FB_HELPER=y \
++    CONFIG_DRM_FBDEV_OVERALLOC=100
+   FILES:=$(LINUX_DIR)/drivers/gpu/drm/drm_kms_helper.ko
+   AUTOLOAD:=$(call AutoProbe,drm_kms_helper)
+ endef
+@@ -288,6 +289,20 @@ endef
+ 
+ $(eval $(call KernelPackage,drm-kms-helper))
+ 
++define KernelPackage/drm-gem-shmem-helper
++  SUBMENU:=$(VIDEO_MENU)
++  TITLE:=GEM shmem helper
++  DEPENDS:=@DISPLAY_SUPPORT +kmod-drm +kmod-drm-kms-helper +kmod-backlight
++  KCONFIG:= \
++    CONFIG_DRM_GEM_SHMEM_HELPER=y
++endef
++
++define KernelPackage/drm-gem-shmem-helper/description
++  DRM GEM shmem helper.
++endef
++
++$(eval $(call KernelPackage,drm-gem-shmem-helper))
++
+ define KernelPackage/drm-amdgpu
+   SUBMENU:=$(VIDEO_MENU)
+   TITLE:=AMDGPU DRM support
+--- a/target/linux/ramips/dts/mt7628an_vocore_vocore2.dtsi
++++ b/target/linux/ramips/dts/mt7628an_vocore_vocore2.dtsi
+@@ -10,7 +10,7 @@
+ 	};
+ 
+ 	chosen {
+-		bootargs = "console=ttyS2,115200";
++		bootargs = "console=tty0 console=ttyS2,115200";
+ 	};
+ };
+ 

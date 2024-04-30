@@ -1,0 +1,80 @@
+--- a/target/linux/ramips/dts/mt7628an_vocore_vocore2.dtsi
++++ b/target/linux/ramips/dts/mt7628an_vocore_vocore2.dtsi
+@@ -56,9 +56,13 @@
+ 
+ &state_default {
+ 	gpio {
+-		groups = "wled_an", "refclk", "wdt";
++		groups = "wled_an", "wdt";
+ 		function = "gpio";
+ 	};
++	refclk {
++		groups = "gpio0";
++		function = "gpio refclk";
++	};
+ };
+ 
+ &wmac {
+@@ -78,6 +82,7 @@
+ };
+ 
+ &i2s {
++	#sound-dai-cells = <0>;
+ 	status = "okay";
+ };
+ 
+diff --git a/mt7628an_vocore_vocore2.dts.orig b/mt7628an_vocore_vocore2.dts
+index 84b30c0..a9086ef 100644
+--- a/mt7628an_vocore_vocore2.dts.orig
++++ b/mt7628an_vocore_vocore2.dts
+@@ -19,10 +19,49 @@
+ 			gpios = <&gpio 44 GPIO_ACTIVE_HIGH>;
+ 		};
+ 	};
++
++	sound {
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "soundcard";
++		simple-audio-card,format = "i2s";
++		simple-audio-card,bitclock-master = <&sound_master>;
++		simple-audio-card,frame-master = <&sound_master>;
++		simple-audio-card,mclk-fs = <272>;
++		simple-audio-card,widgets =
++			"Microphone", "Microphone Jack",
++			"Headphone", "Headphone Jack";
++		simple-audio-card,routing =
++			"LINPUT1", "Microphone Jack",
++			"RINPUT1", "Microphone Jack",
++			"Microphone Jack", "Mic Bias",
++			"Headphone Jack", "LOUT1",
++			"Headphone Jack", "ROUT1";
++
++		simple-audio-card,cpu {
++			sound-dai = <&i2s>;
++		};
++
++		sound_master:simple-audio-card,codec {
++			sound-dai = <&codec>;
++		};
++	};
++};
++
++&i2c {
++	status = "okay";
++
++	codec: es8388@10 {
++		#sound-dai-cells = <0>;
++		compatible = "everest,es8328";
++		reg = <0x10>;
++
++		clocks = <&clkctrl 20>;
++		clock-names = "refclk";
++	};
+ };
+ 
+ &firmware {
+-	reg = <0x50000 0xfb0000>;
++	reg = <0x50000 0x1fb0000>;
+ };
+ 
+ &sdhci {

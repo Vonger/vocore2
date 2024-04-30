@@ -42,16 +42,22 @@ git clone https://github.com/vonger/vocore2.git
 
 1. sdcard (patch dts, tutorial at  https://vonger.cn/?p=15483 )
 
-2. audio/sound card
-   
-   ```
-   patch -p1 < [path]/vocore2/openwrt.2305/openwrt.sound/vocore2-fixmaster-es8388.patch
-   cp [path]/vocore2/openwrt.2305/kernel.sound/*.patch [openwrt path]/target/linux/ramips/patches-5.15/
-   ```
+2. audio/sound patch
 
-   3. ***.config*** here: [path]/vocore2/openwrt.2305/menu.config, include python3/nginx for LuCI, madplay and sound card driver.
+```
+patch -p1 < [path]/vocore2/openwrt.2305/sound/openwrt/vocore2-support-es8388.patch
+cp [path]/vocore2/openwrt.2305/sound/patch-5.15/*.patch [openwrt]/target/linux/ramips/patches-5.15/
+```
 
+   3. display/video patch
 
+```
+patch -p1 < [path]/vocore2/openwrt.2305/video/openwrt/vocore2-enable-video.patch
+cp [path]/vocore2/openwrt.2305/video/patch-5.15/*.patch [openwrt]/target/linux/ramips/patches-5.15/
+cp -r [path]/vocore2/package/mpro [openwrt]/package/utils/
+```
+
+4. ***.config*** here: [path]/vocore2/openwrt.2305/menu.config, include LuCI, madplay, camera, vocroe display, sound card driver.
 
 ## For OpenWrt 22.03
 
