@@ -1,0 +1,277 @@
+diff --git a/target/linux/ramips/dts/mt7628an.dtsi b/target/linux/ramips/dts/mt7628an.dtsi
+index 788e24714f..61edef4970 100644
+--- a/target/linux/ramips/dts/mt7628an.dtsi
++++ b/target/linux/ramips/dts/mt7628an.dtsi
+@@ -1,5 +1,7 @@
+ /dts-v1/;
+ 
++#include <dt-bindings/clock/mt7628-clk.h>
++
+ / {
+ 	#address-cells = <1>;
+ 	#size-cells = <1>;
+@@ -39,16 +41,20 @@
+ 		#size-cells = <1>;
+ 
+ 		sysc: sysc@0 {
+-			compatible = "ralink,mt7620a-sysc", "syscon";
++			compatible = "ralink,mt7620a-sysc", "ralink,mt7628-sysc", "syscon";
+ 			reg = <0x0 0x100>;
++			#clock-cells = <1>;
++			#reset-cells = <1>;
+ 		};
+ 
+ 		watchdog: watchdog@100 {
+ 			compatible = "ralink,mt7628an-wdt", "mediatek,mt7621-wdt";
+ 			reg = <0x100 0x30>;
+ 
+-			resets = <&rstctrl 8>;
++			resets = <&sysc 8>;
+ 			reset-names = "wdt";
++			clocks = <&sysc MT7628_CLK_TIMER>;
++			clock-names = "wdt";
+ 
+ 			interrupt-parent = <&intc>;
+ 			interrupts = <24>;
+@@ -58,8 +64,10 @@
+ 			compatible = "ralink,mt7628an-intc", "ralink,rt2880-intc";
+ 			reg = <0x200 0x100>;
+ 
+-			resets = <&rstctrl 9>;
++			resets = <&sysc 9>;
+ 			reset-names = "intc";
++			clocks = <&sysc MT7628_CLK_INT>;
++			clock-names = "intc";
+ 
+ 			interrupt-controller;
+ 			#interrupt-cells = <1>;
+@@ -76,8 +84,10 @@
+ 			compatible = "ralink,mt7620a-memc", "ralink,rt3050-memc";
+ 			reg = <0x300 0x100>;
+ 
+-			resets = <&rstctrl 10>;
++			resets = <&sysc 10>;
+ 			reset-names = "mc";
++			clocks = <&sysc MT7628_CLK_MC>;
++			clock-names = "mc";
+ 
+ 			interrupt-parent = <&intc>;
+ 			interrupts = <3>;
+@@ -101,8 +111,10 @@
+ 			compatible = "mediatek,mt7621-i2c";
+ 			reg = <0x900 0x100>;
+ 
+-			resets = <&rstctrl 16>;
++			resets = <&sysc 16>;
+ 			reset-names = "i2c";
++			clocks = <&sysc MT7628_CLK_I2C>;
++			clock-names = "i2c";
+ 
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+@@ -117,8 +129,16 @@
+ 			compatible = "mediatek,mt7628-i2s";
+ 			reg = <0xa00 0x100>;
+ 
+-			resets = <&rstctrl 17>;
++			pinctrl-names = "default";
++			pinctrl-0 = <&i2s_pins>;
++
++			resets = <&sysc 17>;
+ 			reset-names = "i2s";
++			clocks = <&sysc MT7628_CLK_I2S
++				  &sysc MT7628_CLK_REFCLK
++				  &sysc MT7628_CLK_12M>;
++			clock-names = "i2s", "refclk", "12m";
++			refclk-source = "12m";
+ 
+ 			interrupt-parent = <&intc>;
+ 			interrupts = <10>;
+@@ -137,8 +157,10 @@
+ 			compatible = "ralink,mt7621-spi";
+ 			reg = <0xb00 0x100>;
+ 
+-			resets = <&rstctrl 18>;
++			resets = <&sysc 18>;
+ 			reset-names = "spi";
++			clocks = <&sysc MT7628_CLK_SPI>;
++			clock-names = "spi";
+ 
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+@@ -159,8 +181,10 @@
+ 
+ 			clock-frequency = <40000000>;
+ 
+-			resets = <&rstctrl 12>;
++			resets = <&sysc 12>;
+ 			reset-names = "uartl";
++			clocks = <&sysc MT7628_CLK_UART0>;
++			clock-names = "uartl";
+ 
+ 			interrupt-parent = <&intc>;
+ 			interrupts = <20>;
+@@ -179,8 +203,10 @@
+ 
+ 			clock-frequency = <40000000>;
+ 
+-			resets = <&rstctrl 19>;
++			resets = <&sysc 19>;
+ 			reset-names = "uart1";
++			clocks = <&sysc MT7628_CLK_UART1>;
++			clock-names = "uart1";
+ 
+ 			interrupt-parent = <&intc>;
+ 			interrupts = <21>;
+@@ -199,10 +225,10 @@
+ 			reg-io-width = <4>;
+ 			no-loopback-test;
+ 
+-			clock-frequency = <40000000>;
+-
+-			resets = <&rstctrl 20>;
++			resets = <&sysc 20>;
+ 			reset-names = "uart2";
++			clocks = <&sysc MT7628_CLK_UART2>;
++			clock-names = "uart2";
+ 
+ 			interrupt-parent = <&intc>;
+ 			interrupts = <22>;
+@@ -218,8 +244,10 @@
+ 			reg = <0x5000 0x1000>;
+ 			#pwm-cells = <2>;
+ 
+-			resets = <&rstctrl 31>;
++			resets = <&sysc 31>;
+ 			reset-names = "pwm";
++			clocks = <&sysc MT7628_CLK_PWM>;
++			clock-names = "pwm";
+ 
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&pwm0_pins>, <&pwm1_pins>;
+@@ -231,8 +259,10 @@
+ 			compatible = "ralink,mt7620a-pcm";
+ 			reg = <0x2000 0x800>;
+ 
+-			resets = <&rstctrl 11>;
++			resets = <&sysc 11>;
+ 			reset-names = "pcm";
++			clocks = <&sysc MT7628_CLK_PCM>;
++			clock-names = "pcm";
+ 
+ 			interrupt-parent = <&intc>;
+ 			interrupts = <4>;
+@@ -244,8 +274,10 @@
+ 			compatible = "ralink,rt3883-gdma";
+ 			reg = <0x2800 0x800>;
+ 
+-			resets = <&rstctrl 14>;
++			resets = <&sysc 14>;
+ 			reset-names = "dma";
++			clocks = <&sysc MT7628_CLK_GDMA>;
++			clock-names = "gdma";
+ 
+ 			interrupt-parent = <&intc>;
+ 			interrupts = <7>;
+@@ -351,32 +383,27 @@
+ 		};
+ 	};
+ 
+-	rstctrl: rstctrl {
+-		compatible = "ralink,mt7620a-reset", "ralink,rt2880-reset";
+-		#reset-cells = <1>;
+-	};
+-
+-	clkctrl: clkctrl {
+-		compatible = "ralink,rt2880-clock";
+-		#clock-cells = <1>;
+-	};
+-
+ 	usbphy: usbphy@10120000 {
+ 		compatible = "mediatek,mt7628-usbphy", "mediatek,mt7620-usbphy";
+ 		reg = <0x10120000 0x1000>;
+ 		#phy-cells = <0>;
+ 
+ 		ralink,sysctl = <&sysc>;
+-		resets = <&rstctrl 22 &rstctrl 25>;
++		resets = <&sysc 22 &sysc 25>;
+ 		reset-names = "host", "device";
+-		clocks = <&clkctrl 22 &clkctrl 25>;
+-		clock-names = "host", "device";
++		clocks = <&sysc MT7628_CLK_UPHY>;
++		clock-names = "uphy";
+ 	};
+ 
+ 	sdhci: sdhci@10130000 {
+ 		compatible = "ralink,mt7620-sdhci";
+ 		reg = <0x10130000 0x4000>;
+ 
++		resets = <&sysc 30>;
++		reset-names = "sdxc";
++		clocks = <&sysc MT7628_CLK_SDXC>;
++		clock-names = "sdxc";
++
+ 		interrupt-parent = <&intc>;
+ 		interrupts = <14>;
+ 
+@@ -429,8 +456,10 @@
+ 		interrupt-parent = <&cpuintc>;
+ 		interrupts = <5>;
+ 
+-		resets = <&rstctrl 21>, <&rstctrl 23>;
++		resets = <&sysc 21>, <&sysc 23>;
+ 		reset-names = "fe", "esw";
++		clocks = <&sysc MT7628_CLK_ETH>;
++		clock-names = "eth";
+ 
+ 		mediatek,switch = <&esw>;
+ 	};
+@@ -439,7 +468,7 @@
+ 		compatible = "mediatek,mt7628-esw", "ralink,rt3050-esw";
+ 		reg = <0x10110000 0x8000>;
+ 
+-		resets = <&rstctrl 24>;
++		resets = <&sysc 24>;
+ 		reset-names = "ephy";
+ 
+ 		interrupt-parent = <&intc>;
+@@ -457,10 +486,10 @@
+ 		interrupt-parent = <&cpuintc>;
+ 		interrupts = <4>;
+ 
+-		resets = <&rstctrl 26 &rstctrl 27>;
++		resets = <&sysc 26 &sysc 27>;
+ 		reset-names = "pcie0", "pcie1";
+-		clocks = <&clkctrl 26 &clkctrl 27>;
+-		clock-names = "pcie0", "pcie1";
++		clocks = <&sysc MT7628_CLK_PCIE>;
++		clock-names = "pcie";
+ 
+ 		status = "disabled";
+ 
+diff --git a/target/linux/ramips/dts/mt7628an_vocore_vocore2.dts b/target/linux/ramips/dts/mt7628an_vocore_vocore2.dts
+index 37f637d3e7..ae0ecead28 100644
+--- a/target/linux/ramips/dts/mt7628an_vocore_vocore2.dts
++++ b/target/linux/ramips/dts/mt7628an_vocore_vocore2.dts
+@@ -54,9 +54,6 @@
+ 		#sound-dai-cells = <0>;
+ 		compatible = "everest,es8328";
+ 		reg = <0x10>;
+-
+-		clocks = <&clkctrl 20>;
+-		clock-names = "refclk";
+ 	};
+ };
+ 
+diff --git a/target/linux/ramips/mt76x8/config-5.15 b/target/linux/ramips/mt76x8/config-5.15
+index 7248aa6633..ec21edeac9 100644
+--- a/target/linux/ramips/mt76x8/config-5.15
++++ b/target/linux/ramips/mt76x8/config-5.15
+@@ -15,6 +15,7 @@ CONFIG_CMDLINE="rootfstype=squashfs,jffs2"
+ CONFIG_CMDLINE_BOOL=y
+ # CONFIG_CMDLINE_OVERRIDE is not set
+ CONFIG_COMMON_CLK=y
++CONFIG_CLK_MTMIPS=y
+ CONFIG_COMPAT_32BIT_TIME=y
+ CONFIG_CPU_GENERIC_DUMP_TLB=y
+ CONFIG_CPU_HAS_DIEI=y
