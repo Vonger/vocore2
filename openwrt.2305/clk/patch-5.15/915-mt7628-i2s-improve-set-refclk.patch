@@ -1,0 +1,88 @@
+Index: linux-5.15.153/sound/soc/ralink/ralink-i2s.c
+===================================================================
+--- linux-5.15.153.orig/sound/soc/ralink/ralink-i2s.c
++++ linux-5.15.153/sound/soc/ralink/ralink-i2s.c
+@@ -128,6 +128,8 @@ struct ralink_i2s {
+ 	struct device *dev;
+ 	void __iomem *regs;
+ 	struct clk *clk;
++	struct clk *refclk;
++	struct clk *refclk_parent;
+ 	struct regmap *regmap;
+ 	u32 flags;
+ 	unsigned int fmt;
+@@ -747,11 +749,6 @@ static void mt7628_refclk_setup(void)
+ {
+ 	uint32_t data;
+ 
+-	/* set i2s and refclk digital pad */
+-	data = rt_sysc_r32(0x3c);
+-	data |= 0x1f;
+-	rt_sysc_w32(data, 0x3c);
+-
+ 	/* Adjust REFCLK0's driving strength */
+ 	data = rt_sysc_r32(0x1354);
+ 	data &= ~(0x1 << 5);
+@@ -760,11 +757,6 @@ static void mt7628_refclk_setup(void)
+ 	data |= ~(0x1 << 5);
+ 	rt_sysc_w32(data, 0x1364);
+ 
+-	/* set refclk output 12Mhz clock */
+-	data = rt_sysc_r32(0x2c);
+-	data &= ~(0x7 << 9);
+-	data |= 0x1 << 9;
+-	rt_sysc_w32(data, 0x2c);
+ }
+ 
+ struct rt_i2s_data {
+@@ -814,6 +806,7 @@ static int ralink_i2s_probe(struct platf
+ 	int irq, ret;
+ 	u32 dma_req;
+ 	struct rt_i2s_data *data;
++	const char *refclk_source;
+ 
+ 	i2s = devm_kzalloc(&pdev->dev, sizeof(*i2s), GFP_KERNEL);
+ 	if (!i2s)
+@@ -871,7 +864,7 @@ static int ralink_i2s_probe(struct platf
+ 	}
+ #endif
+ 
+-	i2s->clk = devm_clk_get(&pdev->dev, NULL);
++	i2s->clk = devm_clk_get(&pdev->dev, "i2s");
+ 	if (IS_ERR(i2s->clk)) {
+ 		dev_err(&pdev->dev, "no clock defined\n");
+ 		return PTR_ERR(i2s->clk);
+@@ -881,6 +874,33 @@ static int ralink_i2s_probe(struct platf
+ 	if (ret)
+ 		return ret;
+ 
++	i2s->refclk = devm_clk_get(&pdev->dev, "refclk");
++	if (IS_ERR(i2s->refclk)) {
++		dev_err(&pdev->dev, "no refclk defined\n");
++		return PTR_ERR(i2s->refclk);
++	}
++
++	if (of_property_read_string(np, "refclk-source", &refclk_source)) {
++		dev_err(&pdev->dev, "no refclk-source define\n");
++		return -EINVAL;
++	}
++
++	i2s->refclk_parent = devm_clk_get(&pdev->dev, refclk_source);
++	if (IS_ERR(i2s->refclk_parent)) {
++		dev_err(&pdev->dev, "no refclk parent defined\n");
++		return PTR_ERR(i2s->refclk_parent);
++	}
++
++	ret = clk_set_parent(i2s->refclk, i2s->refclk_parent);
++	if (ret) {
++		dev_err(&pdev->dev, "Error %d setting refclk parent clock\n", ret);
++		return ret;
++	}
++
++	ret = clk_prepare_enable(i2s->refclk);
++	if (ret)
++		return ret;
++
+ 	ralink_i2s_init_dma_data(i2s, res);
+ 
+ 	ret = device_reset(&pdev->dev);

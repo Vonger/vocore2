@@ -1,0 +1,489 @@
+Index: linux-5.15.153/drivers/clk/ralink/clk-mtmips.c
+===================================================================
+--- linux-5.15.153.orig/drivers/clk/ralink/clk-mtmips.c
++++ linux-5.15.153/drivers/clk/ralink/clk-mtmips.c
+@@ -5,6 +5,7 @@
+  */
+ 
+ #include <linux/bitops.h>
++#include <linux/clk.h>
+ #include <linux/clk-provider.h>
+ #include <linux/mfd/syscon.h>
+ #include <linux/platform_device.h>
+@@ -15,6 +16,7 @@
+ /* Configuration registers */
+ #define SYSC_REG_SYSTEM_CONFIG		0x10
+ #define SYSC_REG_CLKCFG0		0x2c
++#define SYSC_REG_CLKCFG1		0x30
+ #define SYSC_REG_RESET_CTRL		0x34
+ #define SYSC_REG_CPU_SYS_CLKCFG		0x3c
+ #define SYSC_REG_CPLL_CONFIG0		0x54
+@@ -94,6 +96,7 @@
+ struct mtmips_clk;
+ struct mtmips_clk_fixed;
+ struct mtmips_clk_factor;
++struct mtmips_clk_gate;
+ 
+ struct mtmips_clk_data {
+ 	struct mtmips_clk *clk_base;
+@@ -104,6 +107,12 @@ struct mtmips_clk_data {
+ 	size_t num_clk_factor;
+ 	struct mtmips_clk *clk_periph;
+ 	size_t num_clk_periph;
++	struct mtmips_clk_gate *clk_gate;
++	size_t num_clk_gate;
++	struct mtmips_clk_mux *clk_mux;
++	size_t num_clk_mux;
++	const char * const *clk_crit;
++	size_t num_clk_crit;
+ };
+ 
+ struct mtmips_clk_priv {
+@@ -132,6 +141,267 @@ struct mtmips_clk_factor {
+ 	struct clk_hw *hw;
+ };
+ 
++struct mtmips_clk_gate {
++	const char *name;
++	const char *parent_name;
++	struct mtmips_clk_priv *priv;
++	u32 bit_idx;
++	struct clk_hw hw;
++};
++
++struct mtmips_clk_mux {
++	const char *name;
++	const char *const *parent_names;
++	u8 num_parents;
++	struct mtmips_clk_priv *priv;
++	struct clk_hw hw;
++	u32 reg;
++	u8 shift;
++	u32 mask;
++};
++
++static const char *const mt76x8_critical_clocks[] __initconst = {
++	"timer",
++	"int",
++	"mc",
++	"pio",
++	"eth",
++	"uphy",
++	"gdma",
++	"mipsc",
++	"crypto",
++	"sdxc",
++};
++
++#define MUX(_name, _pnames, _reg, _shift, _width)	\
++	{						\
++		.name		= _name,		\
++		.parent_names	= _pnames,		\
++		.num_parents	= ARRAY_SIZE(_pnames),	\
++		.reg		= _reg,			\
++		.shift		= _shift,		\
++		.mask		= BIT(_width) - 1	\
++	}
++
++static const char *const mt76x8_refclk_p[] = {
++	"xtal",
++	"12m",
++	"25m",
++	"40m",
++	"48m",
++	"int_frac",
++	"off",
++	"cpu8d",
++};
++
++static struct mtmips_clk_mux mt76x8_mux_clocks[] = {
++	MUX("refclk", mt76x8_refclk_p, SYSC_REG_CLKCFG0, 9, 3),
++};
++
++static inline struct mtmips_clk_mux *to_mtmips_clk_mux(struct clk_hw *_hw)
++{
++	return container_of(_hw, struct mtmips_clk_mux, hw);
++}
++
++static u8 mtmips_clk_mux_get_parent(struct clk_hw *hw)
++{
++	struct mtmips_clk_mux *clk_mux = to_mtmips_clk_mux(hw);
++	struct regmap *sysc = clk_mux->priv->sysc;
++	unsigned int val;
++
++	regmap_read(sysc, clk_mux->reg, &val);
++
++	val >>= clk_mux->shift;
++	val &= clk_mux->mask;
++
++	return val;
++}
++
++static int mtmips_clk_mux_set_parent(struct clk_hw *hw, u8 index)
++{
++	struct mtmips_clk_mux *clk_mux = to_mtmips_clk_mux(hw);
++	struct regmap *sysc = clk_mux->priv->sysc;
++	u32 mask, val;
++
++	val = index << clk_mux->shift;
++	mask = clk_mux->mask << clk_mux->shift;
++
++	return regmap_update_bits(sysc, clk_mux->reg, mask, val);
++}
++
++static const struct clk_ops mtmips_clk_mux_ops = {
++	.get_parent = mtmips_clk_mux_get_parent,
++	.set_parent = mtmips_clk_mux_set_parent,
++};
++
++static int mtmips_mux_ops_init(struct device_node *np,
++				struct mtmips_clk_mux *sclk)
++{
++	struct clk_init_data init = {
++		.name = sclk->name,
++		.ops = &mtmips_clk_mux_ops,
++		.parent_names = sclk->parent_names,
++		.num_parents = sclk->num_parents,
++		.flags = CLK_SET_RATE_PARENT,
++	};
++
++	sclk->hw.init = &init;
++	return of_clk_hw_register(np, &sclk->hw);
++}
++
++int mtmips_register_mux_clocks(struct device_node *np,
++				struct clk_hw_onecell_data *clk_data,
++				struct mtmips_clk_priv *priv)
++{
++	struct clk_hw **hws = clk_data->hws;
++	struct mtmips_clk_mux *sclk;
++	size_t idx_start = priv->data->num_clk_base + priv->data->num_clk_fixed +
++			   priv->data->num_clk_factor + priv->data->num_clk_periph +
++			   priv->data->num_clk_gate;
++	int ret, i;
++
++	for (i = 0; i < priv->data->num_clk_mux; i++) {
++		int idx = idx_start + i;
++
++		sclk = &priv->data->clk_mux[i];
++		sclk->priv = priv;
++		ret = mtmips_mux_ops_init(np, sclk);
++		if (ret) {
++			pr_err("Couldn't register mux clock %d\n", idx);
++			goto err_clk_unreg;
++		}
++
++		hws[idx] = &sclk->hw;
++	}
++
++	return 0;
++
++err_clk_unreg:
++	while (--i >= 0) {
++		sclk = &priv->data->clk_mux[i];
++		clk_hw_unregister(&sclk->hw);
++	}
++	return ret;
++}
++
++#define GATE(_name, _pname, _shift)		\
++	{					\
++		.name		= _name,	\
++		.parent_name	= _pname,	\
++		.bit_idx	= _shift	\
++	}
++
++static struct mtmips_clk_gate mt76x8_gate_clocks[] = {
++	GATE("timer", "periph", BIT(8)),
++	GATE("int", "periph", BIT(9)),
++	GATE("mc", "periph", BIT(10)),
++	GATE("pcm", "periph", BIT(11)),
++	GATE("uart0", "periph", BIT(12)),
++	GATE("pio", "periph", BIT(13)),
++	GATE("gdma", "periph", BIT(14)),
++	GATE("i2c", "periph", BIT(16)),
++	GATE("i2s", "pcmi2s", BIT(17)),
++	GATE("spi", "bus", BIT(18)),
++	GATE("uart1", "periph", BIT(19)),
++	GATE("uart2", "periph", BIT(20)),
++	GATE("eth", "xtal", BIT(23)),
++	GATE("uphy", "periph", BIT(25)),
++	GATE("pcie", "xtal", BIT(26)),
++	GATE("mipsc", "periph", BIT(28)),
++	GATE("crypto", "periph", BIT(29)),
++	GATE("sdxc", "periph", BIT(30)),
++	GATE("pwm", "periph", BIT(31)),
++};
++
++static inline struct mtmips_clk_gate *to_mtmips_gate(struct clk_hw *hw)
++{
++	return container_of(hw, struct mtmips_clk_gate, hw);
++}
++
++static int mtmips_gate_enable(struct clk_hw *hw)
++{
++	struct mtmips_clk_gate *clk_gate = to_mtmips_gate(hw);
++	struct regmap *sysc = clk_gate->priv->sysc;
++
++	return regmap_update_bits(sysc, SYSC_REG_CLKCFG1,
++				  clk_gate->bit_idx, clk_gate->bit_idx);
++}
++
++static void mtmips_gate_disable(struct clk_hw *hw)
++{
++	struct mtmips_clk_gate *clk_gate = to_mtmips_gate(hw);
++	struct regmap *sysc = clk_gate->priv->sysc;
++
++	regmap_update_bits(sysc, SYSC_REG_CLKCFG1, clk_gate->bit_idx, 0);
++}
++
++static int mtmips_gate_is_enabled(struct clk_hw *hw)
++{
++	struct mtmips_clk_gate *clk_gate = to_mtmips_gate(hw);
++	struct regmap *sysc = clk_gate->priv->sysc;
++	u32 val;
++
++	if (regmap_read(sysc, SYSC_REG_CLKCFG1, &val))
++		return 0;
++
++	return (val & clk_gate->bit_idx);
++}
++
++static const struct clk_ops mtmips_gate_ops = {
++	.enable = mtmips_gate_enable,
++	.disable = mtmips_gate_disable,
++	.is_enabled = mtmips_gate_is_enabled,
++};
++
++static int mtmips_gate_ops_init(struct device_node *np,
++				struct mtmips_clk_gate *sclk)
++{
++	struct clk_init_data init = {
++		.flags = CLK_SET_RATE_PARENT,
++		.num_parents = 1,
++		.parent_names = &sclk->parent_name,
++		.ops = &mtmips_gate_ops,
++		.name = sclk->name,
++	};
++
++	sclk->hw.init = &init;
++	return of_clk_hw_register(np, &sclk->hw);
++}
++
++static int mtmips_register_gate_clocks(struct device_node *np,
++					struct clk_hw_onecell_data *clk_data,
++					struct mtmips_clk_priv *priv)
++{
++	struct clk_hw **hws = clk_data->hws;
++	struct mtmips_clk_gate *sclk;
++	size_t idx_start = priv->data->num_clk_base + priv->data->num_clk_fixed +
++			   priv->data->num_clk_factor + priv->data->num_clk_periph;
++	int ret, i;
++
++	for (i = 0; i < priv->data->num_clk_gate; i++) {
++		int idx = idx_start + i;
++
++		sclk = &priv->data->clk_gate[i];
++		sclk->priv = priv;
++		ret = mtmips_gate_ops_init(np, sclk);
++		if (ret) {
++			pr_err("Couldn't register gate clock %d\n", idx);
++			goto err_clk_unreg;
++		}
++
++		hws[idx] = &sclk->hw;
++	}
++
++	return 0;
++
++err_clk_unreg:
++	while (--i >= 0) {
++		sclk = &priv->data->clk_gate[i];
++		clk_hw_unregister(&sclk->hw);
++	}
++	return ret;
++}
++
+ static unsigned long mtmips_pherip_clk_rate(struct clk_hw *hw,
+ 					    unsigned long parent_rate)
+ {
+@@ -210,19 +480,6 @@ static struct mtmips_clk mt7620_pherip_c
+ 	{ CLK_PERIPH("10180000.wmac", "xtal") }
+ };
+ 
+-static struct mtmips_clk mt76x8_pherip_clks[] = {
+-	{ CLK_PERIPH("10000100.timer", "periph") },
+-	{ CLK_PERIPH("10000120.watchdog", "periph") },
+-	{ CLK_PERIPH("10000900.i2c", "periph") },
+-	{ CLK_PERIPH("10000a00.i2s", "pcmi2s") },
+-	{ CLK_PERIPH("10000b00.spi", "bus") },
+-	{ CLK_PERIPH("10000b40.spi", "bus") },
+-	{ CLK_PERIPH("10000c00.uart0", "periph") },
+-	{ CLK_PERIPH("10000d00.uart1", "periph") },
+-	{ CLK_PERIPH("10000e00.uart2", "periph") },
+-	{ CLK_PERIPH("10300000.wmac", "xtal") }
+-};
+-
+ static int mtmips_register_pherip_clocks(struct device_node *np,
+ 					 struct clk_hw_onecell_data *clk_data,
+ 					 struct mtmips_clk_priv *priv)
+@@ -273,7 +530,11 @@ static struct mtmips_clk_fixed rt3352_fi
+ 
+ static struct mtmips_clk_fixed mt76x8_fixed_clocks[] = {
+ 	CLK_FIXED("pcmi2s", "xtal", 480000000),
+-	CLK_FIXED("periph", "xtal", 40000000)
++	CLK_FIXED("periph", "xtal", 40000000),
++	CLK_FIXED("12m", NULL, 12000000),
++	CLK_FIXED("25m", NULL, 25000000),
++	CLK_FIXED("40m", NULL, 40000000),
++	CLK_FIXED("48m", NULL, 48000000),
+ };
+ 
+ static int mtmips_register_fixed_clocks(struct clk_hw_onecell_data *clk_data,
+@@ -326,6 +587,11 @@ static struct mtmips_clk_factor rt305x_f
+ 	CLK_FACTOR("bus", "cpu", 1, 3)
+ };
+ 
++static struct mtmips_clk_factor mt76x8_factor_clocks[] = {
++	CLK_FACTOR("bus", "cpu", 1, 3),
++	CLK_FACTOR("cpu8d", "cpu", 1, 8),
++};
++
+ static int mtmips_register_factor_clocks(struct clk_hw_onecell_data *clk_data,
+ 					 struct mtmips_clk_priv *priv)
+ {
+@@ -741,6 +1007,17 @@ err_clk_unreg:
+ 	return ret;
+ }
+ 
++void mtmips_clk_protect_critical(struct mtmips_clk_priv *priv)
++{
++	int i;
++
++	for (i = 0; i < priv->data->num_clk_crit; i++) {
++		struct clk *clk = __clk_lookup(priv->data->clk_crit[i]);
++
++		clk_prepare_enable(clk);
++	}
++}
++
+ static const struct mtmips_clk_data rt2880_clk_data = {
+ 	.clk_base = rt2880_clks_base,
+ 	.num_clk_base = ARRAY_SIZE(rt2880_clks_base),
+@@ -812,10 +1089,14 @@ static const struct mtmips_clk_data mt76
+ 	.num_clk_base = ARRAY_SIZE(mt76x8_clks_base),
+ 	.clk_fixed = mt76x8_fixed_clocks,
+ 	.num_clk_fixed = ARRAY_SIZE(mt76x8_fixed_clocks),
+-	.clk_factor = rt305x_factor_clocks,
+-	.num_clk_factor = ARRAY_SIZE(rt305x_factor_clocks),
+-	.clk_periph = mt76x8_pherip_clks,
+-	.num_clk_periph = ARRAY_SIZE(mt76x8_pherip_clks),
++	.clk_factor = mt76x8_factor_clocks,
++	.num_clk_factor = ARRAY_SIZE(mt76x8_factor_clocks),
++	.clk_gate = mt76x8_gate_clocks,
++	.num_clk_gate = ARRAY_SIZE(mt76x8_gate_clocks),
++	.clk_mux = mt76x8_mux_clocks,
++	.num_clk_mux = ARRAY_SIZE(mt76x8_mux_clocks),
++	.clk_crit = mt76x8_critical_clocks,
++	.num_clk_crit = ARRAY_SIZE(mt76x8_critical_clocks),
+ };
+ 
+ static const struct of_device_id mtmips_of_match[] = {
+@@ -904,7 +1185,8 @@ static void __init mtmips_clk_init(struc
+ 	data = match->data;
+ 	priv->data = data;
+ 	count = priv->data->num_clk_base + priv->data->num_clk_fixed +
+-		priv->data->num_clk_factor + priv->data->num_clk_periph;
++		priv->data->num_clk_factor + priv->data->num_clk_periph +
++		priv->data->num_clk_gate + priv->data->num_clk_mux;
+ 	clk_data = kzalloc(struct_size(clk_data, hws, count), GFP_KERNEL);
+ 	if (!clk_data)
+ 		goto free_clk_priv;
+@@ -933,6 +1215,18 @@ static void __init mtmips_clk_init(struc
+ 		goto unreg_clk_factor;
+ 	}
+ 
++	ret = mtmips_register_gate_clocks(node, clk_data, priv);
++	if (ret) {
++		pr_err("Couldn't register gate clocks\n");
++		goto unreg_clk_periph;
++	}
++
++	ret = mtmips_register_mux_clocks(node, clk_data, priv);
++	if (ret) {
++		pr_err("Couldn't register mux clocks\n");
++		goto unreg_clk_gate;
++	}
++
+ 	clk_data->num = count;
+ 
+ 	ret = of_clk_add_hw_provider(node, of_clk_hw_onecell_get, clk_data);
+@@ -941,8 +1235,17 @@ static void __init mtmips_clk_init(struc
+ 		goto unreg_clk_periph;
+ 	}
+ 
++	mtmips_clk_protect_critical(priv);
++
+ 	return;
+ 
++unreg_clk_gate:
++	for (i = 0; i < priv->data->num_clk_gate; i++) {
++		struct mtmips_clk_gate *sclk = &priv->data->clk_gate[i];
++
++		clk_hw_unregister(&sclk->hw);
++	}
++
+ unreg_clk_periph:
+ 	for (i = 0; i < priv->data->num_clk_periph; i++) {
+ 		struct mtmips_clk *sclk = &priv->data->clk_periph[i];
+Index: linux-5.15.153/include/dt-bindings/clock/mt7628-clk.h
+===================================================================
+--- /dev/null
++++ linux-5.15.153/include/dt-bindings/clock/mt7628-clk.h
+@@ -0,0 +1,46 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++/*
++ * Author: ieiao <ieiao@outlook.com>
++ */
++
++#ifndef _DT_BINDINGS_CLK_MT7628_H
++#define _DT_BINDINGS_CLK_MT7628_H
++
++#define MT7628_CLK_XTAL		0
++#define MT7628_CLK_CPU		1
++
++#define MT7628_CLK_PCMI2S	2
++#define MT7628_CLK_PERIPH	3
++#define MT7628_CLK_12M		4
++#define MT7628_CLK_25M		5
++#define MT7628_CLK_40M		6
++#define MT7628_CLK_48M		7
++
++#define MT7628_CLK_BUS		8
++#define MT7628_CLK_CPU8D	9
++
++#define MT7628_CLK_TIMER	10
++#define MT7628_CLK_INT		11
++#define MT7628_CLK_MC		12
++#define MT7628_CLK_PCM		13
++#define MT7628_CLK_UART0	14
++#define MT7628_CLK_PIO		15
++#define MT7628_CLK_GDMA		16
++#define MT7628_CLK_I2C		17
++#define MT7628_CLK_I2S		18
++#define MT7628_CLK_SPI		19
++#define MT7628_CLK_UART1	20
++#define MT7628_CLK_UART2	21
++#define MT7628_CLK_ETH		22
++#define MT7628_CLK_UPHY		23
++#define MT7628_CLK_PCIE		24
++#define MT7628_CLK_MIPSC	25
++#define MT7628_CLK_CRYPTO	26
++#define MT7628_CLK_SDXC		27
++#define MT7628_CLK_PWM		28
++
++#define MT7628_CLK_REFCLK	29
++
++#define MT7628_CLK_MAX		30
++
++#endif /* _DT_BINDINGS_CLK_MT7628_H */

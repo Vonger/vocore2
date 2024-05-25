@@ -23,10 +23,8 @@
  	status = "okay";
  };
  
-diff --git a/mt7628an_vocore_vocore2.dts.orig b/mt7628an_vocore_vocore2.dts
-index 84b30c0..a9086ef 100644
---- a/mt7628an_vocore_vocore2.dts.orig
-+++ b/mt7628an_vocore_vocore2.dts
+--- a/target/linux/ramips/dts/mt7628an_vocore_vocore2.dts
++++ b/target/linux/ramips/dts/mt7628an_vocore_vocore2.dts
 @@ -19,10 +19,49 @@
  			gpios = <&gpio 44 GPIO_ACTIVE_HIGH>;
  		};
