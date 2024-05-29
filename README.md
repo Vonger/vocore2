@@ -58,7 +58,17 @@ cp [path]/vocore2/openwrt.2305/video/patch-5.15/*.patch [openwrt]/target/linux/r
 cp -r [path]/vocore2/openwrt.2305/video/package/mpro [openwrt]/package/utils/
 ```
 
-4. ***.config*** here: [path]/vocore2/openwrt.2305/menu.config, include LuCI, madplay, camera, vocroe display, sound card driver.
+4. clk driver patch
+
+> This part is not necessary, it's just an improvement on OpenWrt official clk driver.
+
+```
+patch -p1 < [path]/vocore2/openwrt.2305/clk/openwrt/0001-Delete-reset-controller-driver.patch
+patch -p1 < [path]/vocore2/openwrt.2305/clk/openwrt/0002-mt7628-dts-config-apply-clk-changes.patch
+cp [path]/vocore2/openwrt.2305/clk/patch-5.15/*.patch [openwrt]/target/linux/ramips/patches-5.15/
+```
+
+5. ***.config*** here: [path]/vocore2/openwrt.2305/menu.config, include LuCI, madplay, camera, vocroe display, sound card driver.
 
 ## For OpenWrt 22.03
 
