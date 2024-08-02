@@ -297,7 +297,7 @@ static ssize_t fbusb_pause_show(struct device *dev,
 				struct device_attribute *attr, char *buf)
 {
 	struct fbusb_info *uinfo = dev_get_drvdata(dev);
-	return sprintf(buf, "%d\n", uinfo->pause);
+	return sprintf(buf, "%ld\n", uinfo->pause);
 }
 
 static ssize_t fbusb_pause_store(struct device *dev,
@@ -305,8 +305,8 @@ static ssize_t fbusb_pause_store(struct device *dev,
 				 size_t count)
 {
 	struct fbusb_info *uinfo = dev_get_drvdata(dev);
-	kstrtol(buf, 10, &uinfo->pause);
-	return count;
+	int result = kstrtol(buf, 10, &uinfo->pause);
+	return result == 0 ? count : result;
 }
 
 static DEVICE_ATTR(pause, 0660, fbusb_pause_show, fbusb_pause_store);
