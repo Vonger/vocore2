@@ -476,7 +476,7 @@ static int fbusb_probe(struct usb_interface *interface,
 	}
 
 	info->fbops = &fbusb_ops;
-	info->flags = FBINFO_DEFAULT | FBINFO_VIRTFB;
+	info->flags = FBINFO_VIRTFB;
 	info->screen_buffer = vmem;
 	info->pseudo_palette = par->palette;
 
