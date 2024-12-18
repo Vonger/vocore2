@@ -33,14 +33,4 @@ index f1e61f33a5..a0490e9b61 100644
  define KernelPackage/drm-amdgpu
    SUBMENU:=$(VIDEO_MENU)
    TITLE:=AMDGPU DRM support
---- a/target/linux/ramips/dts/mt7628an_vocore_vocore2.dtsi
-+++ b/target/linux/ramips/dts/mt7628an_vocore_vocore2.dtsi
-@@ -10,7 +10,7 @@
- 	};
- 
- 	chosen {
--		bootargs = "console=ttyS2,115200";
-+		bootargs = "console=tty0 console=ttyS2,115200";
- 	};
- };
  
