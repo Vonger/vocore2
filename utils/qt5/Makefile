@@ -18,7 +18,8 @@ PKG_SOURCE_URL:=http://download.qt-project.org/archive/qt/$(PKG_VERSION)/$(PKG_V
 PKG_BUILD_DIR=$(BUILD_DIR)/qt-everywhere-opensource-src-$(PKG_VERSION).$(PKG_RELEASE)
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
-PKG_BUILD_DEPENDS:=+libstdcpp
+#PKG_BUILD_DEPENDS:=+libstdcpp
+PKG_BUILD_DEPENDS:=+uclibcxx
 
 include $(INCLUDE_DIR)/package.mk
 -include $(if $(DUMP),,./files/qmake.mk)
