@@ -68,7 +68,7 @@ patch -p1 < [path]/vocore2/openwrt.2305/clk/openwrt/0002-mt7628-dts-config-apply
 cp [path]/vocore2/openwrt.2305/clk/patch-5.15/*.patch [openwrt]/target/linux/ramips/patches-5.15/
 ```
 
-5. ***.config*** here: [path]/vocore2/openwrt.2305/menu.config, include LuCI, madplay, camera, vocroe display, sound card driver.
+5. ***.config*** here: [path]/vocore2/openwrt.2305/menu.config, include LuCI, madplay, camera, vocore display, sound card driver.
 
 ## For OpenWrt 22.03
 
